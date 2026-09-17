@@ -1,0 +1,18 @@
+name: Restringir PRs hacia main
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  verificar-origen:
+    name: Solo se permite PR hacia main desde dev
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar rama de origen
+        run: |
+          if [ "${{ github.head_ref }}" != "dev" ]; then
+            echo "Solo se permiten Pull Requests hacia 'main' que vengan de la rama 'dev'. Esta PR viene de '${{ github.head_ref }}'."
+            exit 1
+          fi
+          echo "OK: la PR viene de dev."
