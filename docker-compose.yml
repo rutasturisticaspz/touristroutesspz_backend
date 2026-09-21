@@ -1,0 +1,65 @@
+# ------------------------------------------------------------
+#  Backend — despliegue independiente.
+#
+#  Este archivo es distinto del docker-compose.yml de la raíz (ese es
+#  solo para desarrollo local). Este es el que se entrega para
+#  producción, y espera que la base de datos ya esté corriendo en su
+#  propio contenedor en la misma máquina (ver ../db/docker-compose.yml)
+#  — por eso se une a la red "rutas-turisticas-red" que ese compose
+#  crea, y se conecta a la base por su nombre de contenedor (rutas-db)
+#  en vez de una IP. Si la base corriera en otro servidor en vez de
+#  este, no hay red que compartir: ahí sí DATABASE_URL debe apuntar a
+#  la IP/host real de esa base.
+#
+#      cp .env.example .env   (si no existe: aquí van las credenciales
+#                               reales del servidor, no las de local)
+#      docker compose up -d --build
+#
+#  OJO con el orden: la base (../db) se debe levantar PRIMERO, porque
+#  es la que crea la red "rutas-turisticas-red". Si este compose se
+#  levanta antes y esa red no existe todavía, falla.
+#
+#  Las imágenes NO se entregan dentro de este repo: las monta el
+#  admin del servidor en un volumen aparte, en la ruta que él ya
+#  tenga preparada para eso. UPLOADS_HOST_PATH (en el .env de esta
+#  carpeta) le dice a este compose donde esta esa ruta; por defecto
+#  usa ./uploads (por si alguien lo corre sin definirla), pero en el
+#  servidor real casi siempre va a ser otra cosa, ej.
+#  /var/data/rutas-turisticas/uploads. Adentro del contenedor la ruta
+#  siempre es /app/uploads: eso no cambia, es la de afuera la que se
+#  ajusta.
+# ------------------------------------------------------------
+
+services:
+  backend:
+    build:
+      context: .
+    container_name: rutas-backend
+    restart: unless-stopped
+    environment:
+      PORT: 2999
+      NODE_ENV: production
+      DATABASE_URL: "${DATABASE_URL:?falta en el .env: cadena de conexion a la base de datos real}"
+      JWT_SECRET: "${JWT_SECRET:?falta en el .env: genere uno nuevo con npm run generar-secreto, nunca el de desarrollo}"
+      UPLOADS_DIR: /app/uploads
+      CORS_ORIGIN: "${CORS_ORIGIN:?falta en el .env: dominio del sitio publico, ej. https://quehacerenperez.una.ac.cr}"
+      # Correo saliente (SMTP), opcional: si se dejan vacias en el
+      # .env, el sistema arranca igual y solo falla "Responder por
+      # correo" en /admin/mensajes al usarse. Ver backend/.env.example
+      # para como conseguir estos datos.
+      SMTP_HOST: "${SMTP_HOST:-}"
+      SMTP_PORT: "${SMTP_PORT:-587}"
+      SMTP_USER: "${SMTP_USER:-}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD:-}"
+      SMTP_FROM: "${SMTP_FROM:-}"
+    ports:
+      - "2999:2999"
+    volumes:
+      # Las imágenes viven aquí, fuera de la imagen de Docker, para
+      # que una reconstrucción no las borre.
+      - ${UPLOADS_HOST_PATH:-./uploads}:/app/uploads
+
+networks:
+  default:
+    name: rutas-turisticas-red
+    external: true
