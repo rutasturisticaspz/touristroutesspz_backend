@@ -1,0 +1,679 @@
+-- db_rutas_turisticas.UsuariosRutas definition
+
+CREATE TABLE `UsuariosRutas` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` text,
+  `email` text,
+  `password` text,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `rol` text,
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.categorias definition
+
+CREATE TABLE `categorias` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` text NOT NULL,
+  `descripcion` text NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  `nombreIngles` text NOT NULL,
+  `descripcionIngles` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.contactos definition
+
+CREATE TABLE `contactos` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `valor` text NOT NULL,
+  `tipo` text NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2104 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.mensajes_contactenos definition
+
+CREATE TABLE `mensajes_contactenos` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` text NOT NULL,
+  `correo` text NOT NULL,
+  `asunto` text NOT NULL,
+  `mensaje` text NOT NULL,
+  `estado` text NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.ubicaciones definition
+
+CREATE TABLE `ubicaciones` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `provincia` text NOT NULL,
+  `canton` text NOT NULL,
+  `distrito` text NOT NULL,
+  `detalle` text NOT NULL,
+  `latitud` text NOT NULL,
+  `longitud` text NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=724 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.atracciones definition
+
+CREATE TABLE `atracciones` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` text NOT NULL,
+  `descripcion` text NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  `ubicacionId` int DEFAULT NULL,
+  `declaracionTuristica` tinyint NOT NULL DEFAULT '0',
+  `descripcionIngles` text NOT NULL,
+  `permitenMascotas` tinyint NOT NULL DEFAULT '0',
+  `permitenNinos` tinyint NOT NULL DEFAULT '0',
+  `discapacidadVisual` tinyint NOT NULL DEFAULT '0',
+  `discapacidadAuditiva` tinyint NOT NULL DEFAULT '0',
+  `discapacidadFisica` tinyint NOT NULL DEFAULT '0',
+  `discapacidadCognitiva` tinyint NOT NULL DEFAULT '0',
+  `discapacidadSicosocial` tinyint NOT NULL DEFAULT '0',
+  `permitenMascotasDescripcion` text,
+  `permitenMascotasDescripcionIngles` text,
+  `permitenNinosDescripcion` text,
+  `permitenNinosDescripcionIngles` text,
+  `discapacidadVisualDescripcion` text,
+  `discapacidadVisualDescripcionIngles` text,
+  `discapacidadAuditivaDescripcion` text,
+  `discapacidadAuditivaDescripcionIngles` text,
+  `discapacidadFisicaDescripcion` text,
+  `discapacidadFisicaDescripcionIngles` text,
+  `discapacidadCognitivaDescripcion` text,
+  `discapacidadCognitivaDescripcionIngles` text,
+  `discapacidadSicosocialDescripcion` text,
+  `discapacidadSicosocialDescripcionIngles` text,
+  PRIMARY KEY (`id`),
+  KEY `FK_81720e7cb4b389b5a76167ba237` (`ubicacionId`),
+  CONSTRAINT `FK_81720e7cb4b389b5a76167ba237` FOREIGN KEY (`ubicacionId`) REFERENCES `ubicaciones` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=294 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.atracciones_categorias_categorias definition
+
+CREATE TABLE `atracciones_categorias_categorias` (
+  `atraccionesId` int NOT NULL,
+  `categoriasId` int NOT NULL,
+  PRIMARY KEY (`atraccionesId`,`categoriasId`),
+  KEY `IDX_b4c7a088b70770e0ec7be60f46` (`atraccionesId`),
+  KEY `IDX_3ebefb1668f46abefd185a777b` (`categoriasId`),
+  CONSTRAINT `FK_3ebefb1668f46abefd185a777b1` FOREIGN KEY (`categoriasId`) REFERENCES `categorias` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_b4c7a088b70770e0ec7be60f464` FOREIGN KEY (`atraccionesId`) REFERENCES `atracciones` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.atracciones_contactos_contactos definition
+
+CREATE TABLE `atracciones_contactos_contactos` (
+  `atraccionesId` int NOT NULL,
+  `contactosId` int NOT NULL,
+  PRIMARY KEY (`atraccionesId`,`contactosId`),
+  KEY `IDX_10af72ec1291cce878685fe588` (`atraccionesId`),
+  KEY `IDX_c59061cd2937f864a2c16919c9` (`contactosId`),
+  CONSTRAINT `FK_10af72ec1291cce878685fe588a` FOREIGN KEY (`atraccionesId`) REFERENCES `atracciones` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_c59061cd2937f864a2c16919c9d` FOREIGN KEY (`contactosId`) REFERENCES `contactos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.calificaciones definition
+
+CREATE TABLE `calificaciones` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `descripcion` text,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  `usuarioId` int DEFAULT NULL,
+  `atraccionId` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_375603f03606312da8761092b02` (`usuarioId`),
+  KEY `FK_022fa75c069a1df0503780aae78` (`atraccionId`),
+  CONSTRAINT `FK_022fa75c069a1df0503780aae78` FOREIGN KEY (`atraccionId`) REFERENCES `atracciones` (`id`),
+  CONSTRAINT `FK_375603f03606312da8761092b02` FOREIGN KEY (`usuarioId`) REFERENCES `UsuariosRutas` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.eventos definition
+
+CREATE TABLE `eventos` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` text NOT NULL,
+  `nombreIngles` text NOT NULL,
+  `descripcion` text NOT NULL,
+  `descripcionIngles` text NOT NULL,
+  `fechaInicio` timestamp(6) NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `fechaFin` timestamp(6) NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `mostrarFechaInicio` timestamp(6) NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `mostrarFechaFin` timestamp(6) NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  `ubicacionId` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_bf05ddd0161d427170cdfa79f6c` (`ubicacionId`),
+  CONSTRAINT `FK_bf05ddd0161d427170cdfa79f6c` FOREIGN KEY (`ubicacionId`) REFERENCES `ubicaciones` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.eventos_atracciones_atracciones definition
+
+CREATE TABLE `eventos_atracciones_atracciones` (
+  `eventosId` int NOT NULL,
+  `atraccionesId` int NOT NULL,
+  PRIMARY KEY (`eventosId`,`atraccionesId`),
+  KEY `IDX_666f0ed4403c43b1262c364e72` (`eventosId`),
+  KEY `IDX_8f715781487c50afa6c73cc4aa` (`atraccionesId`),
+  CONSTRAINT `FK_666f0ed4403c43b1262c364e72d` FOREIGN KEY (`eventosId`) REFERENCES `eventos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_8f715781487c50afa6c73cc4aa0` FOREIGN KEY (`atraccionesId`) REFERENCES `atracciones` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.eventos_contactos_contactos definition
+
+CREATE TABLE `eventos_contactos_contactos` (
+  `eventosId` int NOT NULL,
+  `contactosId` int NOT NULL,
+  PRIMARY KEY (`eventosId`,`contactosId`),
+  KEY `IDX_8bbb6ee40efe4d42cb10ce999c` (`eventosId`),
+  KEY `IDX_e1b95bd329d81074784ea97213` (`contactosId`),
+  CONSTRAINT `FK_8bbb6ee40efe4d42cb10ce999c6` FOREIGN KEY (`eventosId`) REFERENCES `eventos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_e1b95bd329d81074784ea97213d` FOREIGN KEY (`contactosId`) REFERENCES `contactos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.hoteles definition
+
+CREATE TABLE `hoteles` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` text NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  `ubicacionId` int DEFAULT NULL,
+  `descripcion` text NOT NULL,
+  `declaracionTuristica` tinyint NOT NULL DEFAULT '0',
+  `descripcionIngles` text NOT NULL,
+  `permitenMascotas` tinyint NOT NULL DEFAULT '0',
+  `permitenNinos` tinyint NOT NULL DEFAULT '0',
+  `discapacidadVisual` tinyint NOT NULL DEFAULT '0',
+  `discapacidadAuditiva` tinyint NOT NULL DEFAULT '0',
+  `discapacidadFisica` tinyint NOT NULL DEFAULT '0',
+  `discapacidadCognitiva` tinyint NOT NULL DEFAULT '0',
+  `discapacidadSicosocial` tinyint NOT NULL DEFAULT '0',
+  `permitenMascotasDescripcion` text,
+  `permitenMascotasDescripcionIngles` text,
+  `permitenNinosDescripcion` text,
+  `permitenNinosDescripcionIngles` text,
+  `discapacidadVisualDescripcion` text,
+  `discapacidadVisualDescripcionIngles` text,
+  `discapacidadAuditivaDescripcion` text,
+  `discapacidadAuditivaDescripcionIngles` text,
+  `discapacidadFisicaDescripcion` text,
+  `discapacidadFisicaDescripcionIngles` text,
+  `discapacidadCognitivaDescripcion` text,
+  `discapacidadCognitivaDescripcionIngles` text,
+  `discapacidadSicosocialDescripcion` text,
+  `discapacidadSicosocialDescripcionIngles` text,
+  PRIMARY KEY (`id`),
+  KEY `FK_65a1aeff5910e2a866a91a30c7e` (`ubicacionId`),
+  CONSTRAINT `FK_65a1aeff5910e2a866a91a30c7e` FOREIGN KEY (`ubicacionId`) REFERENCES `ubicaciones` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=224 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.hoteles_categorias_categorias definition
+
+CREATE TABLE `hoteles_categorias_categorias` (
+  `hotelesId` int NOT NULL,
+  `categoriasId` int NOT NULL,
+  PRIMARY KEY (`hotelesId`,`categoriasId`),
+  KEY `IDX_f12ca8b71b70c8e7229a03cabe` (`hotelesId`),
+  KEY `IDX_2a09a2fdedd122a7cb936916b8` (`categoriasId`),
+  CONSTRAINT `FK_2a09a2fdedd122a7cb936916b8b` FOREIGN KEY (`categoriasId`) REFERENCES `categorias` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_f12ca8b71b70c8e7229a03cabe4` FOREIGN KEY (`hotelesId`) REFERENCES `hoteles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.hoteles_contactos_contactos definition
+
+CREATE TABLE `hoteles_contactos_contactos` (
+  `hotelesId` int NOT NULL,
+  `contactosId` int NOT NULL,
+  PRIMARY KEY (`hotelesId`,`contactosId`),
+  KEY `IDX_d1b33fa3cf01e44b515707f24e` (`hotelesId`),
+  KEY `IDX_a42447069818c50ba8a47461da` (`contactosId`),
+  CONSTRAINT `FK_a42447069818c50ba8a47461da7` FOREIGN KEY (`contactosId`) REFERENCES `contactos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_d1b33fa3cf01e44b515707f24e9` FOREIGN KEY (`hotelesId`) REFERENCES `hoteles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.imagenes definition
+
+CREATE TABLE `imagenes` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` text NOT NULL,
+  `descripcion` text,
+  `url` text NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  `atraccionId` int DEFAULT NULL,
+  `nameUrl` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_b3fdee2454758ed6d0cfc95ca59` (`atraccionId`),
+  CONSTRAINT `FK_b3fdee2454758ed6d0cfc95ca59` FOREIGN KEY (`atraccionId`) REFERENCES `atracciones` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=1041 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.imagenes_eventos definition
+
+CREATE TABLE `imagenes_eventos` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` text NOT NULL,
+  `descripcion` text,
+  `url` text NOT NULL,
+  `nameUrl` text NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  `eventoId` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_5392ae7cb65cef8b1d2ded15d67` (`eventoId`),
+  CONSTRAINT `FK_5392ae7cb65cef8b1d2ded15d67` FOREIGN KEY (`eventoId`) REFERENCES `eventos` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.imagenes_hoteles definition
+
+CREATE TABLE `imagenes_hoteles` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` text NOT NULL,
+  `descripcion` text,
+  `url` text NOT NULL,
+  `nameUrl` text NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  `hotelId` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_e6b0d8526441eedbed48b1344ec` (`hotelId`),
+  CONSTRAINT `FK_e6b0d8526441eedbed48b1344ec` FOREIGN KEY (`hotelId`) REFERENCES `hoteles` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=440 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.oficinas_turisticas definition
+
+CREATE TABLE `oficinas_turisticas` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` text NOT NULL,
+  `nombreEncargado` text NOT NULL,
+  `descripcion` text NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  `ubicacionId` int DEFAULT NULL,
+  `declaracionTuristica` tinyint NOT NULL DEFAULT '0',
+  `descripcionIngles` text NOT NULL,
+  `discapacidadVisual` tinyint NOT NULL DEFAULT '0',
+  `discapacidadAuditiva` tinyint NOT NULL DEFAULT '0',
+  `discapacidadFisica` tinyint NOT NULL DEFAULT '0',
+  `discapacidadCognitiva` tinyint NOT NULL DEFAULT '0',
+  `discapacidadSicosocial` tinyint NOT NULL DEFAULT '0',
+  `discapacidadVisualDescripcion` text,
+  `discapacidadVisualDescripcionIngles` text,
+  `discapacidadAuditivaDescripcion` text,
+  `discapacidadAuditivaDescripcionIngles` text,
+  `discapacidadFisicaDescripcion` text,
+  `discapacidadFisicaDescripcionIngles` text,
+  `discapacidadCognitivaDescripcion` text,
+  `discapacidadCognitivaDescripcionIngles` text,
+  `discapacidadSicosocialDescripcion` text,
+  `discapacidadSicosocialDescripcionIngles` text,
+  PRIMARY KEY (`id`),
+  KEY `FK_9005a5700caf9e762401e65bc4b` (`ubicacionId`),
+  CONSTRAINT `FK_9005a5700caf9e762401e65bc4b` FOREIGN KEY (`ubicacionId`) REFERENCES `ubicaciones` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.oficinas_turisticas_contactos_contactos definition
+
+CREATE TABLE `oficinas_turisticas_contactos_contactos` (
+  `oficinasTuristicasId` int NOT NULL,
+  `contactosId` int NOT NULL,
+  PRIMARY KEY (`oficinasTuristicasId`,`contactosId`),
+  KEY `IDX_42f2c3be59b324bdd019ab14fc` (`oficinasTuristicasId`),
+  KEY `IDX_e04ff379e1d18820b29102ab4e` (`contactosId`),
+  CONSTRAINT `FK_42f2c3be59b324bdd019ab14fcc` FOREIGN KEY (`oficinasTuristicasId`) REFERENCES `oficinas_turisticas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_e04ff379e1d18820b29102ab4e8` FOREIGN KEY (`contactosId`) REFERENCES `contactos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.operadores_turisticos definition
+
+CREATE TABLE `operadores_turisticos` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` text NOT NULL,
+  `descripcion` text NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  `ubicacionId` int DEFAULT NULL,
+  `declaracionTuristica` tinyint NOT NULL DEFAULT '0',
+  `descripcionIngles` text NOT NULL,
+  `discapacidadVisual` tinyint NOT NULL DEFAULT '0',
+  `discapacidadAuditiva` tinyint NOT NULL DEFAULT '0',
+  `discapacidadFisica` tinyint NOT NULL DEFAULT '0',
+  `discapacidadCognitiva` tinyint NOT NULL DEFAULT '0',
+  `discapacidadSicosocial` tinyint NOT NULL DEFAULT '0',
+  `discapacidadVisualDescripcion` text,
+  `discapacidadVisualDescripcionIngles` text,
+  `discapacidadAuditivaDescripcion` text,
+  `discapacidadAuditivaDescripcionIngles` text,
+  `discapacidadFisicaDescripcion` text,
+  `discapacidadFisicaDescripcionIngles` text,
+  `discapacidadCognitivaDescripcion` text,
+  `discapacidadCognitivaDescripcionIngles` text,
+  `discapacidadSicosocialDescripcion` text,
+  `discapacidadSicosocialDescripcionIngles` text,
+  PRIMARY KEY (`id`),
+  KEY `FK_01037fa45d53750b6b88b3bab2e` (`ubicacionId`),
+  CONSTRAINT `FK_01037fa45d53750b6b88b3bab2e` FOREIGN KEY (`ubicacionId`) REFERENCES `ubicaciones` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=87 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.operadores_turisticos_contactos_contactos definition
+
+CREATE TABLE `operadores_turisticos_contactos_contactos` (
+  `operadoresTuristicosId` int NOT NULL,
+  `contactosId` int NOT NULL,
+  PRIMARY KEY (`operadoresTuristicosId`,`contactosId`),
+  KEY `IDX_8af59eba939cf043966cda6b40` (`operadoresTuristicosId`),
+  KEY `IDX_55edcc8427b39b606d861aa0ab` (`contactosId`),
+  CONSTRAINT `FK_55edcc8427b39b606d861aa0ab0` FOREIGN KEY (`contactosId`) REFERENCES `contactos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_8af59eba939cf043966cda6b401` FOREIGN KEY (`operadoresTuristicosId`) REFERENCES `operadores_turisticos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.rentadoras_vehiculos definition
+
+CREATE TABLE `rentadoras_vehiculos` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` text NOT NULL,
+  `descripcion` text NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  `ubicacionId` int DEFAULT NULL,
+  `descripcionIngles` text NOT NULL,
+  `discapacidadVisual` tinyint NOT NULL DEFAULT '0',
+  `discapacidadAuditiva` tinyint NOT NULL DEFAULT '0',
+  `discapacidadFisica` tinyint NOT NULL DEFAULT '0',
+  `discapacidadCognitiva` tinyint NOT NULL DEFAULT '0',
+  `discapacidadSicosocial` tinyint NOT NULL DEFAULT '0',
+  `discapacidadVisualDescripcion` text,
+  `discapacidadVisualDescripcionIngles` text,
+  `discapacidadAuditivaDescripcion` text,
+  `discapacidadAuditivaDescripcionIngles` text,
+  `discapacidadFisicaDescripcion` text,
+  `discapacidadFisicaDescripcionIngles` text,
+  `discapacidadCognitivaDescripcion` text,
+  `discapacidadCognitivaDescripcionIngles` text,
+  `discapacidadSicosocialDescripcion` text,
+  `discapacidadSicosocialDescripcionIngles` text,
+  PRIMARY KEY (`id`),
+  KEY `FK_addce49626c69818e9698ec19a6` (`ubicacionId`),
+  CONSTRAINT `FK_addce49626c69818e9698ec19a6` FOREIGN KEY (`ubicacionId`) REFERENCES `ubicaciones` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.rentadoras_vehiculos_contactos_contactos definition
+
+CREATE TABLE `rentadoras_vehiculos_contactos_contactos` (
+  `rentadorasVehiculosId` int NOT NULL,
+  `contactosId` int NOT NULL,
+  PRIMARY KEY (`rentadorasVehiculosId`,`contactosId`),
+  KEY `IDX_91315dfe359baa14665935565b` (`rentadorasVehiculosId`),
+  KEY `IDX_0f811d2caaf375ed4d8fc25b6a` (`contactosId`),
+  CONSTRAINT `FK_0f811d2caaf375ed4d8fc25b6a7` FOREIGN KEY (`contactosId`) REFERENCES `contactos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_91315dfe359baa14665935565bc` FOREIGN KEY (`rentadorasVehiculosId`) REFERENCES `rentadoras_vehiculos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.restaurantes definition
+
+CREATE TABLE `restaurantes` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` text NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  `ubicacionId` int DEFAULT NULL,
+  `declaracionTuristica` tinyint NOT NULL DEFAULT '0',
+  `descripcion` text NOT NULL,
+  `descripcionIngles` text NOT NULL,
+  `permitenMascotas` tinyint NOT NULL DEFAULT '0',
+  `permitenNinos` tinyint NOT NULL DEFAULT '0',
+  `discapacidadVisual` tinyint NOT NULL DEFAULT '0',
+  `discapacidadAuditiva` tinyint NOT NULL DEFAULT '0',
+  `discapacidadFisica` tinyint NOT NULL DEFAULT '0',
+  `discapacidadCognitiva` tinyint NOT NULL DEFAULT '0',
+  `discapacidadSicosocial` tinyint NOT NULL DEFAULT '0',
+  `permitenMascotasDescripcion` text,
+  `permitenMascotasDescripcionIngles` text,
+  `permitenNinosDescripcion` text,
+  `permitenNinosDescripcionIngles` text,
+  `discapacidadVisualDescripcion` text,
+  `discapacidadVisualDescripcionIngles` text,
+  `discapacidadAuditivaDescripcion` text,
+  `discapacidadAuditivaDescripcionIngles` text,
+  `discapacidadFisicaDescripcion` text,
+  `discapacidadFisicaDescripcionIngles` text,
+  `discapacidadCognitivaDescripcion` text,
+  `discapacidadCognitivaDescripcionIngles` text,
+  `discapacidadSicosocialDescripcion` text,
+  `discapacidadSicosocialDescripcionIngles` text,
+  PRIMARY KEY (`id`),
+  KEY `FK_8b87c9e6ac61922720c1c372965` (`ubicacionId`),
+  CONSTRAINT `FK_8b87c9e6ac61922720c1c372965` FOREIGN KEY (`ubicacionId`) REFERENCES `ubicaciones` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=164 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.restaurantes_contactos_contactos definition
+
+CREATE TABLE `restaurantes_contactos_contactos` (
+  `restaurantesId` int NOT NULL,
+  `contactosId` int NOT NULL,
+  PRIMARY KEY (`restaurantesId`,`contactosId`),
+  KEY `IDX_3a540c48e528af870b4aa8b4a8` (`restaurantesId`),
+  KEY `IDX_cf442cab6d9957791812dc9350` (`contactosId`),
+  CONSTRAINT `FK_3a540c48e528af870b4aa8b4a8d` FOREIGN KEY (`restaurantesId`) REFERENCES `restaurantes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_cf442cab6d9957791812dc9350c` FOREIGN KEY (`contactosId`) REFERENCES `contactos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.rutas_turisticas definition
+
+CREATE TABLE `rutas_turisticas` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` text NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  `usuarioId` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_db80f47a037a849dfb7b4d940ed` (`usuarioId`),
+  CONSTRAINT `FK_db80f47a037a849dfb7b4d940ed` FOREIGN KEY (`usuarioId`) REFERENCES `UsuariosRutas` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.rutas_turisticas_atracciones_atracciones definition
+
+CREATE TABLE `rutas_turisticas_atracciones_atracciones` (
+  `rutasTuristicasId` int NOT NULL,
+  `atraccionesId` int NOT NULL,
+  PRIMARY KEY (`rutasTuristicasId`,`atraccionesId`),
+  KEY `IDX_e8c5d41e5f3ae4b36417731e57` (`rutasTuristicasId`),
+  KEY `IDX_7959656f847a86fa9c075c5dc0` (`atraccionesId`),
+  CONSTRAINT `FK_7959656f847a86fa9c075c5dc02` FOREIGN KEY (`atraccionesId`) REFERENCES `atracciones` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_e8c5d41e5f3ae4b36417731e570` FOREIGN KEY (`rutasTuristicasId`) REFERENCES `rutas_turisticas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.eventos_hoteles_hoteles definition
+
+CREATE TABLE `eventos_hoteles_hoteles` (
+  `eventosId` int NOT NULL,
+  `hotelesId` int NOT NULL,
+  PRIMARY KEY (`eventosId`,`hotelesId`),
+  KEY `IDX_cf0ba38c98ced0ecfce998d836` (`eventosId`),
+  KEY `IDX_e69dceca98231fce8b9353507e` (`hotelesId`),
+  CONSTRAINT `FK_cf0ba38c98ced0ecfce998d8366` FOREIGN KEY (`eventosId`) REFERENCES `eventos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_e69dceca98231fce8b9353507e0` FOREIGN KEY (`hotelesId`) REFERENCES `hoteles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.eventos_oficinas_oficinas_turisticas definition
+
+CREATE TABLE `eventos_oficinas_oficinas_turisticas` (
+  `eventosId` int NOT NULL,
+  `oficinasTuristicasId` int NOT NULL,
+  PRIMARY KEY (`eventosId`,`oficinasTuristicasId`),
+  KEY `IDX_19d8c617422d1a2485f580dd60` (`eventosId`),
+  KEY `IDX_8665d7523878f878b06a0ec00a` (`oficinasTuristicasId`),
+  CONSTRAINT `FK_19d8c617422d1a2485f580dd60e` FOREIGN KEY (`eventosId`) REFERENCES `eventos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_8665d7523878f878b06a0ec00a7` FOREIGN KEY (`oficinasTuristicasId`) REFERENCES `oficinas_turisticas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.eventos_operadores_operadores_turisticos definition
+
+CREATE TABLE `eventos_operadores_operadores_turisticos` (
+  `eventosId` int NOT NULL,
+  `operadoresTuristicosId` int NOT NULL,
+  PRIMARY KEY (`eventosId`,`operadoresTuristicosId`),
+  KEY `IDX_e492720ae061baace4ff898c41` (`eventosId`),
+  KEY `IDX_a36198809aadc7ccd10b7030b0` (`operadoresTuristicosId`),
+  CONSTRAINT `FK_a36198809aadc7ccd10b7030b0b` FOREIGN KEY (`operadoresTuristicosId`) REFERENCES `operadores_turisticos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_e492720ae061baace4ff898c416` FOREIGN KEY (`eventosId`) REFERENCES `eventos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.eventos_rentadoras_rentadoras_vehiculos definition
+
+CREATE TABLE `eventos_rentadoras_rentadoras_vehiculos` (
+  `eventosId` int NOT NULL,
+  `rentadorasVehiculosId` int NOT NULL,
+  PRIMARY KEY (`eventosId`,`rentadorasVehiculosId`),
+  KEY `IDX_bebb2057523c25ed9e147e3933` (`eventosId`),
+  KEY `IDX_9f355d165c718c07b70a160351` (`rentadorasVehiculosId`),
+  CONSTRAINT `FK_9f355d165c718c07b70a160351d` FOREIGN KEY (`rentadorasVehiculosId`) REFERENCES `rentadoras_vehiculos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_bebb2057523c25ed9e147e3933f` FOREIGN KEY (`eventosId`) REFERENCES `eventos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.eventos_restaurantes_restaurantes definition
+
+CREATE TABLE `eventos_restaurantes_restaurantes` (
+  `eventosId` int NOT NULL,
+  `restaurantesId` int NOT NULL,
+  PRIMARY KEY (`eventosId`,`restaurantesId`),
+  KEY `IDX_639653f542f2c99992342a2c74` (`eventosId`),
+  KEY `IDX_78d1a5a9aed0f3299ebddd04e4` (`restaurantesId`),
+  CONSTRAINT `FK_639653f542f2c99992342a2c742` FOREIGN KEY (`eventosId`) REFERENCES `eventos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_78d1a5a9aed0f3299ebddd04e48` FOREIGN KEY (`restaurantesId`) REFERENCES `restaurantes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.imagenes_oficinas_turisticas definition
+
+CREATE TABLE `imagenes_oficinas_turisticas` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` text NOT NULL,
+  `descripcion` text,
+  `url` text NOT NULL,
+  `nameUrl` text NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  `oficinaTuristicaId` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_f77b7cd43e05b9cd539d1985909` (`oficinaTuristicaId`),
+  CONSTRAINT `FK_f77b7cd43e05b9cd539d1985909` FOREIGN KEY (`oficinaTuristicaId`) REFERENCES `oficinas_turisticas` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.imagenes_operadores_turisticos definition
+
+CREATE TABLE `imagenes_operadores_turisticos` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` text NOT NULL,
+  `descripcion` text,
+  `url` text NOT NULL,
+  `nameUrl` text NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  `operadorTuristicoId` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_a495ebc0a9a02901df63bc5e491` (`operadorTuristicoId`),
+  CONSTRAINT `FK_a495ebc0a9a02901df63bc5e491` FOREIGN KEY (`operadorTuristicoId`) REFERENCES `operadores_turisticos` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.imagenes_rentadoras_vehiculos definition
+
+CREATE TABLE `imagenes_rentadoras_vehiculos` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` text NOT NULL,
+  `descripcion` text,
+  `url` text NOT NULL,
+  `nameUrl` text NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  `rentadoraVehiculosId` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_8b3b613e62349cf6da3dad04d9a` (`rentadoraVehiculosId`),
+  CONSTRAINT `FK_8b3b613e62349cf6da3dad04d9a` FOREIGN KEY (`rentadoraVehiculosId`) REFERENCES `rentadoras_vehiculos` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- db_rutas_turisticas.imagenes_restaurantes definition
+
+CREATE TABLE `imagenes_restaurantes` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` text NOT NULL,
+  `descripcion` text,
+  `url` text NOT NULL,
+  `nameUrl` text NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT 'Active',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updateAt` timestamp NULL DEFAULT NULL,
+  `restauranteId` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_a161e4d5c01b97fa8ff0b9b9349` (`restauranteId`),
+  CONSTRAINT `FK_a161e4d5c01b97fa8ff0b9b9349` FOREIGN KEY (`restauranteId`) REFERENCES `restaurantes` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=315 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
