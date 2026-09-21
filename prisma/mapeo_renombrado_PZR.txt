@@ -1,0 +1,403 @@
+TABLAS
+======
+UsuariosRutas  ->  PZR_usuariosrutas
+categorias  ->  PZR_categorias
+contactos  ->  PZR_contactos
+mensajes_contactenos  ->  PZR_mensajes_contactenos
+ubicaciones  ->  PZR_ubicaciones
+atracciones  ->  PZR_atracciones
+atracciones_categorias_categorias  ->  PZR_atracciones_categorias_categorias
+atracciones_contactos_contactos  ->  PZR_atracciones_contactos_contactos
+calificaciones  ->  PZR_calificaciones
+eventos  ->  PZR_eventos
+eventos_atracciones_atracciones  ->  PZR_eventos_atracciones_atracciones
+eventos_contactos_contactos  ->  PZR_eventos_contactos_contactos
+hoteles  ->  PZR_hoteles
+hoteles_categorias_categorias  ->  PZR_hoteles_categorias_categorias
+hoteles_contactos_contactos  ->  PZR_hoteles_contactos_contactos
+imagenes  ->  PZR_imagenes
+imagenes_eventos  ->  PZR_imagenes_eventos
+imagenes_hoteles  ->  PZR_imagenes_hoteles
+oficinas_turisticas  ->  PZR_oficinas_turisticas
+oficinas_turisticas_contactos_contactos  ->  PZR_oficinas_turisticas_contactos_contactos
+operadores_turisticos  ->  PZR_operadores_turisticos
+operadores_turisticos_contactos_contactos  ->  PZR_operadores_turisticos_contactos_contactos
+rentadoras_vehiculos  ->  PZR_rentadoras_vehiculos
+rentadoras_vehiculos_contactos_contactos  ->  PZR_rentadoras_vehiculos_contactos_contactos
+restaurantes  ->  PZR_restaurantes
+restaurantes_contactos_contactos  ->  PZR_restaurantes_contactos_contactos
+rutas_turisticas  ->  PZR_rutas_turisticas
+rutas_turisticas_atracciones_atracciones  ->  PZR_rutas_turisticas_atracciones_atracciones
+eventos_hoteles_hoteles  ->  PZR_eventos_hoteles_hoteles
+eventos_oficinas_oficinas_turisticas  ->  PZR_eventos_oficinas_oficinas_turisticas
+eventos_operadores_operadores_turisticos  ->  PZR_eventos_operadores_operadores_turisticos
+eventos_rentadoras_rentadoras_vehiculos  ->  PZR_eventos_rentadoras_rentadoras_vehiculos
+eventos_restaurantes_restaurantes  ->  PZR_eventos_restaurantes_restaurantes
+imagenes_oficinas_turisticas  ->  PZR_imagenes_oficinas_turisticas
+imagenes_operadores_turisticos  ->  PZR_imagenes_operadores_turisticos
+imagenes_rentadoras_vehiculos  ->  PZR_imagenes_rentadoras_vehiculos
+imagenes_restaurantes  ->  PZR_imagenes_restaurantes
+
+COLUMNAS
+========
+-- UsuariosRutas --
+  id  ->  usuariosrutas_id
+  nombre  ->  usuariosrutas_nombre
+  email  ->  usuariosrutas_email
+  password  ->  usuariosrutas_password
+  state  ->  usuariosrutas_state
+  rol  ->  usuariosrutas_rol
+  createdAt  ->  usuariosrutas_created_at
+  updateAt  ->  usuariosrutas_update_at
+-- categorias --
+  id  ->  categorias_id
+  nombre  ->  categorias_nombre
+  descripcion  ->  categorias_descripcion
+  state  ->  categorias_state
+  createdAt  ->  categorias_created_at
+  updateAt  ->  categorias_update_at
+  nombreIngles  ->  categorias_nombre_ingles
+  descripcionIngles  ->  categorias_descripcion_ingles
+-- contactos --
+  id  ->  contactos_id
+  valor  ->  contactos_valor
+  tipo  ->  contactos_tipo
+  state  ->  contactos_state
+  createdAt  ->  contactos_created_at
+  updateAt  ->  contactos_update_at
+-- mensajes_contactenos --
+  id  ->  mensajes_contactenos_id
+  nombre  ->  mensajes_contactenos_nombre
+  correo  ->  mensajes_contactenos_correo
+  asunto  ->  mensajes_contactenos_asunto
+  mensaje  ->  mensajes_contactenos_mensaje
+  estado  ->  mensajes_contactenos_estado
+  state  ->  mensajes_contactenos_state
+  createdAt  ->  mensajes_contactenos_created_at
+  updateAt  ->  mensajes_contactenos_update_at
+-- ubicaciones --
+  id  ->  ubicaciones_id
+  provincia  ->  ubicaciones_provincia
+  canton  ->  ubicaciones_canton
+  distrito  ->  ubicaciones_distrito
+  detalle  ->  ubicaciones_detalle
+  latitud  ->  ubicaciones_latitud
+  longitud  ->  ubicaciones_longitud
+  state  ->  ubicaciones_state
+  createdAt  ->  ubicaciones_created_at
+  updateAt  ->  ubicaciones_update_at
+-- atracciones --
+  id  ->  atracciones_id
+  nombre  ->  atracciones_nombre
+  descripcion  ->  atracciones_descripcion
+  state  ->  atracciones_state
+  createdAt  ->  atracciones_created_at
+  updateAt  ->  atracciones_update_at
+  ubicacionId  ->  atracciones_ubicacion_id
+  declaracionTuristica  ->  atracciones_declaracion_turistica
+  descripcionIngles  ->  atracciones_descripcion_ingles
+  permitenMascotas  ->  atracciones_permiten_mascotas
+  permitenNinos  ->  atracciones_permiten_ninos
+  discapacidadVisual  ->  atracciones_discapacidad_visual
+  discapacidadAuditiva  ->  atracciones_discapacidad_auditiva
+  discapacidadFisica  ->  atracciones_discapacidad_fisica
+  discapacidadCognitiva  ->  atracciones_discapacidad_cognitiva
+  discapacidadSicosocial  ->  atracciones_discapacidad_sicosocial
+  permitenMascotasDescripcion  ->  atracciones_permiten_mascotas_descripcion
+  permitenMascotasDescripcionIngles  ->  atracciones_permiten_mascotas_descripcion_ingles
+  permitenNinosDescripcion  ->  atracciones_permiten_ninos_descripcion
+  permitenNinosDescripcionIngles  ->  atracciones_permiten_ninos_descripcion_ingles
+  discapacidadVisualDescripcion  ->  atracciones_discapacidad_visual_descripcion
+  discapacidadVisualDescripcionIngles  ->  atracciones_discapacidad_visual_descripcion_ingles
+  discapacidadAuditivaDescripcion  ->  atracciones_discapacidad_auditiva_descripcion
+  discapacidadAuditivaDescripcionIngles  ->  atracciones_discapacidad_auditiva_descripcion_ingles
+  discapacidadFisicaDescripcion  ->  atracciones_discapacidad_fisica_descripcion
+  discapacidadFisicaDescripcionIngles  ->  atracciones_discapacidad_fisica_descripcion_ingles
+  discapacidadCognitivaDescripcion  ->  atracciones_discapacidad_cognitiva_descripcion
+  discapacidadCognitivaDescripcionIngles  ->  atracciones_discapacidad_cognitiva_descripcion_ingles
+  discapacidadSicosocialDescripcion  ->  atracciones_discapacidad_sicosocial_descripcion
+  discapacidadSicosocialDescripcionIngles  ->  atracciones_discapacidad_sicosocial_descripcion_ingles
+-- atracciones_categorias_categorias --
+  atraccionesId  ->  atracciones_categorias_categorias_atracciones_id
+  categoriasId  ->  atracciones_categorias_categorias_categorias_id
+-- atracciones_contactos_contactos --
+  atraccionesId  ->  atracciones_contactos_contactos_atracciones_id
+  contactosId  ->  atracciones_contactos_contactos_contactos_id
+-- calificaciones --
+  id  ->  calificaciones_id
+  descripcion  ->  calificaciones_descripcion
+  state  ->  calificaciones_state
+  createdAt  ->  calificaciones_created_at
+  updateAt  ->  calificaciones_update_at
+  usuarioId  ->  calificaciones_usuario_id
+  atraccionId  ->  calificaciones_atraccion_id
+-- eventos --
+  id  ->  eventos_id
+  nombre  ->  eventos_nombre
+  nombreIngles  ->  eventos_nombre_ingles
+  descripcion  ->  eventos_descripcion
+  descripcionIngles  ->  eventos_descripcion_ingles
+  fechaInicio  ->  eventos_fecha_inicio
+  fechaFin  ->  eventos_fecha_fin
+  mostrarFechaInicio  ->  eventos_mostrar_fecha_inicio
+  mostrarFechaFin  ->  eventos_mostrar_fecha_fin
+  state  ->  eventos_state
+  createdAt  ->  eventos_created_at
+  updateAt  ->  eventos_update_at
+  ubicacionId  ->  eventos_ubicacion_id
+-- eventos_atracciones_atracciones --
+  eventosId  ->  eventos_atracciones_atracciones_eventos_id
+  atraccionesId  ->  eventos_atracciones_atracciones_atracciones_id
+-- eventos_contactos_contactos --
+  eventosId  ->  eventos_contactos_contactos_eventos_id
+  contactosId  ->  eventos_contactos_contactos_contactos_id
+-- hoteles --
+  id  ->  hoteles_id
+  nombre  ->  hoteles_nombre
+  state  ->  hoteles_state
+  createdAt  ->  hoteles_created_at
+  updateAt  ->  hoteles_update_at
+  ubicacionId  ->  hoteles_ubicacion_id
+  descripcion  ->  hoteles_descripcion
+  declaracionTuristica  ->  hoteles_declaracion_turistica
+  descripcionIngles  ->  hoteles_descripcion_ingles
+  permitenMascotas  ->  hoteles_permiten_mascotas
+  permitenNinos  ->  hoteles_permiten_ninos
+  discapacidadVisual  ->  hoteles_discapacidad_visual
+  discapacidadAuditiva  ->  hoteles_discapacidad_auditiva
+  discapacidadFisica  ->  hoteles_discapacidad_fisica
+  discapacidadCognitiva  ->  hoteles_discapacidad_cognitiva
+  discapacidadSicosocial  ->  hoteles_discapacidad_sicosocial
+  permitenMascotasDescripcion  ->  hoteles_permiten_mascotas_descripcion
+  permitenMascotasDescripcionIngles  ->  hoteles_permiten_mascotas_descripcion_ingles
+  permitenNinosDescripcion  ->  hoteles_permiten_ninos_descripcion
+  permitenNinosDescripcionIngles  ->  hoteles_permiten_ninos_descripcion_ingles
+  discapacidadVisualDescripcion  ->  hoteles_discapacidad_visual_descripcion
+  discapacidadVisualDescripcionIngles  ->  hoteles_discapacidad_visual_descripcion_ingles
+  discapacidadAuditivaDescripcion  ->  hoteles_discapacidad_auditiva_descripcion
+  discapacidadAuditivaDescripcionIngles  ->  hoteles_discapacidad_auditiva_descripcion_ingles
+  discapacidadFisicaDescripcion  ->  hoteles_discapacidad_fisica_descripcion
+  discapacidadFisicaDescripcionIngles  ->  hoteles_discapacidad_fisica_descripcion_ingles
+  discapacidadCognitivaDescripcion  ->  hoteles_discapacidad_cognitiva_descripcion
+  discapacidadCognitivaDescripcionIngles  ->  hoteles_discapacidad_cognitiva_descripcion_ingles
+  discapacidadSicosocialDescripcion  ->  hoteles_discapacidad_sicosocial_descripcion
+  discapacidadSicosocialDescripcionIngles  ->  hoteles_discapacidad_sicosocial_descripcion_ingles
+-- hoteles_categorias_categorias --
+  hotelesId  ->  hoteles_categorias_categorias_hoteles_id
+  categoriasId  ->  hoteles_categorias_categorias_categorias_id
+-- hoteles_contactos_contactos --
+  hotelesId  ->  hoteles_contactos_contactos_hoteles_id
+  contactosId  ->  hoteles_contactos_contactos_contactos_id
+-- imagenes --
+  id  ->  imagenes_id
+  nombre  ->  imagenes_nombre
+  descripcion  ->  imagenes_descripcion
+  url  ->  imagenes_url
+  state  ->  imagenes_state
+  createdAt  ->  imagenes_created_at
+  updateAt  ->  imagenes_update_at
+  atraccionId  ->  imagenes_atraccion_id
+  nameUrl  ->  imagenes_name_url
+-- imagenes_eventos --
+  id  ->  imagenes_eventos_id
+  nombre  ->  imagenes_eventos_nombre
+  descripcion  ->  imagenes_eventos_descripcion
+  url  ->  imagenes_eventos_url
+  nameUrl  ->  imagenes_eventos_name_url
+  state  ->  imagenes_eventos_state
+  createdAt  ->  imagenes_eventos_created_at
+  updateAt  ->  imagenes_eventos_update_at
+  eventoId  ->  imagenes_eventos_evento_id
+-- imagenes_hoteles --
+  id  ->  imagenes_hoteles_id
+  nombre  ->  imagenes_hoteles_nombre
+  descripcion  ->  imagenes_hoteles_descripcion
+  url  ->  imagenes_hoteles_url
+  nameUrl  ->  imagenes_hoteles_name_url
+  state  ->  imagenes_hoteles_state
+  createdAt  ->  imagenes_hoteles_created_at
+  updateAt  ->  imagenes_hoteles_update_at
+  hotelId  ->  imagenes_hoteles_hotel_id
+-- oficinas_turisticas --
+  id  ->  oficinas_turisticas_id
+  nombre  ->  oficinas_turisticas_nombre
+  nombreEncargado  ->  oficinas_turisticas_nombre_encargado
+  descripcion  ->  oficinas_turisticas_descripcion
+  state  ->  oficinas_turisticas_state
+  createdAt  ->  oficinas_turisticas_created_at
+  updateAt  ->  oficinas_turisticas_update_at
+  ubicacionId  ->  oficinas_turisticas_ubicacion_id
+  declaracionTuristica  ->  oficinas_turisticas_declaracion_turistica
+  descripcionIngles  ->  oficinas_turisticas_descripcion_ingles
+  discapacidadVisual  ->  oficinas_turisticas_discapacidad_visual
+  discapacidadAuditiva  ->  oficinas_turisticas_discapacidad_auditiva
+  discapacidadFisica  ->  oficinas_turisticas_discapacidad_fisica
+  discapacidadCognitiva  ->  oficinas_turisticas_discapacidad_cognitiva
+  discapacidadSicosocial  ->  oficinas_turisticas_discapacidad_sicosocial
+  discapacidadVisualDescripcion  ->  oficinas_turisticas_discapacidad_visual_descripcion
+  discapacidadVisualDescripcionIngles  ->  oficinas_turisticas_discapacidad_visual_descripcion_ingles
+  discapacidadAuditivaDescripcion  ->  oficinas_turisticas_discapacidad_auditiva_descripcion
+  discapacidadAuditivaDescripcionIngles  ->  oficinas_turisticas_discapacidad_auditiva_descripcion_ingles
+  discapacidadFisicaDescripcion  ->  oficinas_turisticas_discapacidad_fisica_descripcion
+  discapacidadFisicaDescripcionIngles  ->  oficinas_turisticas_discapacidad_fisica_descripcion_ingles
+  discapacidadCognitivaDescripcion  ->  oficinas_turisticas_discapacidad_cognitiva_descripcion
+  discapacidadCognitivaDescripcionIngles  ->  oficinas_turisticas_discapacidad_cognitiva_descripcion_ingles
+  discapacidadSicosocialDescripcion  ->  oficinas_turisticas_discapacidad_sicosocial_descripcion
+  discapacidadSicosocialDescripcionIngles  ->  oficinas_turisticas_discapacidad_sicosocial_descripcion_ingles
+-- oficinas_turisticas_contactos_contactos --
+  oficinasTuristicasId  ->  oficinas_turisticas_contactos_contactos_oficinas_turisticas_id
+  contactosId  ->  oficinas_turisticas_contactos_contactos_contactos_id
+-- operadores_turisticos --
+  id  ->  operadores_turisticos_id
+  nombre  ->  operadores_turisticos_nombre
+  descripcion  ->  operadores_turisticos_descripcion
+  state  ->  operadores_turisticos_state
+  createdAt  ->  operadores_turisticos_created_at
+  updateAt  ->  operadores_turisticos_update_at
+  ubicacionId  ->  operadores_turisticos_ubicacion_id
+  declaracionTuristica  ->  operadores_turisticos_declaracion_turistica
+  descripcionIngles  ->  operadores_turisticos_descripcion_ingles
+  discapacidadVisual  ->  operadores_turisticos_discapacidad_visual
+  discapacidadAuditiva  ->  operadores_turisticos_discapacidad_auditiva
+  discapacidadFisica  ->  operadores_turisticos_discapacidad_fisica
+  discapacidadCognitiva  ->  operadores_turisticos_discapacidad_cognitiva
+  discapacidadSicosocial  ->  operadores_turisticos_discapacidad_sicosocial
+  discapacidadVisualDescripcion  ->  operadores_turisticos_discapacidad_visual_descripcion
+  discapacidadVisualDescripcionIngles  ->  operadores_turisticos_discapacidad_visual_descripcion_ingles
+  discapacidadAuditivaDescripcion  ->  operadores_turisticos_discapacidad_auditiva_descripcion
+  discapacidadAuditivaDescripcionIngles  ->  operadores_turisticos_discapacidad_auditiva_descripcion_ingles
+  discapacidadFisicaDescripcion  ->  operadores_turisticos_discapacidad_fisica_descripcion
+  discapacidadFisicaDescripcionIngles  ->  operadores_turisticos_discapacidad_fisica_descripcion_ingles
+  discapacidadCognitivaDescripcion  ->  operadores_turisticos_discapacidad_cognitiva_descripcion
+  discapacidadCognitivaDescripcionIngles  ->  operadores_turisticos_discapacidad_cognitiva_descripcion_ingles
+  discapacidadSicosocialDescripcion  ->  operadores_turisticos_discapacidad_sicosocial_descripcion
+  discapacidadSicosocialDescripcionIngles  ->  operadores_turisticos_discapacidad_sicosocial_descripcion_ingles
+-- operadores_turisticos_contactos_contactos --
+  operadoresTuristicosId  ->  operadores_turisticos_contactos_contactos_operadores_id
+  contactosId  ->  operadores_turisticos_contactos_contactos_contactos_id
+-- rentadoras_vehiculos --
+  id  ->  rentadoras_vehiculos_id
+  nombre  ->  rentadoras_vehiculos_nombre
+  descripcion  ->  rentadoras_vehiculos_descripcion
+  state  ->  rentadoras_vehiculos_state
+  createdAt  ->  rentadoras_vehiculos_created_at
+  updateAt  ->  rentadoras_vehiculos_update_at
+  ubicacionId  ->  rentadoras_vehiculos_ubicacion_id
+  descripcionIngles  ->  rentadoras_vehiculos_descripcion_ingles
+  discapacidadVisual  ->  rentadoras_vehiculos_discapacidad_visual
+  discapacidadAuditiva  ->  rentadoras_vehiculos_discapacidad_auditiva
+  discapacidadFisica  ->  rentadoras_vehiculos_discapacidad_fisica
+  discapacidadCognitiva  ->  rentadoras_vehiculos_discapacidad_cognitiva
+  discapacidadSicosocial  ->  rentadoras_vehiculos_discapacidad_sicosocial
+  discapacidadVisualDescripcion  ->  rentadoras_vehiculos_discapacidad_visual_descripcion
+  discapacidadVisualDescripcionIngles  ->  rentadoras_vehiculos_discapacidad_visual_descripcion_ingles
+  discapacidadAuditivaDescripcion  ->  rentadoras_vehiculos_discapacidad_auditiva_descripcion
+  discapacidadAuditivaDescripcionIngles  ->  rentadoras_vehiculos_discapacidad_auditiva_descripcion_ingles
+  discapacidadFisicaDescripcion  ->  rentadoras_vehiculos_discapacidad_fisica_descripcion
+  discapacidadFisicaDescripcionIngles  ->  rentadoras_vehiculos_discapacidad_fisica_descripcion_ingles
+  discapacidadCognitivaDescripcion  ->  rentadoras_vehiculos_discapacidad_cognitiva_descripcion
+  discapacidadCognitivaDescripcionIngles  ->  rentadoras_vehiculos_discapacidad_cognitiva_descripcion_ingles
+  discapacidadSicosocialDescripcion  ->  rentadoras_vehiculos_discapacidad_sicosocial_descripcion
+  discapacidadSicosocialDescripcionIngles  ->  rentadoras_vehiculos_discapacidad_sicosocial_descripcion_ingles
+-- rentadoras_vehiculos_contactos_contactos --
+  rentadorasVehiculosId  ->  rentadoras_vehiculos_contactos_contactos_rentadoras_vehiculos_id
+  contactosId  ->  rentadoras_vehiculos_contactos_contactos_contactos_id
+-- restaurantes --
+  id  ->  restaurantes_id
+  nombre  ->  restaurantes_nombre
+  state  ->  restaurantes_state
+  createdAt  ->  restaurantes_created_at
+  updateAt  ->  restaurantes_update_at
+  ubicacionId  ->  restaurantes_ubicacion_id
+  declaracionTuristica  ->  restaurantes_declaracion_turistica
+  descripcion  ->  restaurantes_descripcion
+  descripcionIngles  ->  restaurantes_descripcion_ingles
+  permitenMascotas  ->  restaurantes_permiten_mascotas
+  permitenNinos  ->  restaurantes_permiten_ninos
+  discapacidadVisual  ->  restaurantes_discapacidad_visual
+  discapacidadAuditiva  ->  restaurantes_discapacidad_auditiva
+  discapacidadFisica  ->  restaurantes_discapacidad_fisica
+  discapacidadCognitiva  ->  restaurantes_discapacidad_cognitiva
+  discapacidadSicosocial  ->  restaurantes_discapacidad_sicosocial
+  permitenMascotasDescripcion  ->  restaurantes_permiten_mascotas_descripcion
+  permitenMascotasDescripcionIngles  ->  restaurantes_permiten_mascotas_descripcion_ingles
+  permitenNinosDescripcion  ->  restaurantes_permiten_ninos_descripcion
+  permitenNinosDescripcionIngles  ->  restaurantes_permiten_ninos_descripcion_ingles
+  discapacidadVisualDescripcion  ->  restaurantes_discapacidad_visual_descripcion
+  discapacidadVisualDescripcionIngles  ->  restaurantes_discapacidad_visual_descripcion_ingles
+  discapacidadAuditivaDescripcion  ->  restaurantes_discapacidad_auditiva_descripcion
+  discapacidadAuditivaDescripcionIngles  ->  restaurantes_discapacidad_auditiva_descripcion_ingles
+  discapacidadFisicaDescripcion  ->  restaurantes_discapacidad_fisica_descripcion
+  discapacidadFisicaDescripcionIngles  ->  restaurantes_discapacidad_fisica_descripcion_ingles
+  discapacidadCognitivaDescripcion  ->  restaurantes_discapacidad_cognitiva_descripcion
+  discapacidadCognitivaDescripcionIngles  ->  restaurantes_discapacidad_cognitiva_descripcion_ingles
+  discapacidadSicosocialDescripcion  ->  restaurantes_discapacidad_sicosocial_descripcion
+  discapacidadSicosocialDescripcionIngles  ->  restaurantes_discapacidad_sicosocial_descripcion_ingles
+-- restaurantes_contactos_contactos --
+  restaurantesId  ->  restaurantes_contactos_contactos_restaurantes_id
+  contactosId  ->  restaurantes_contactos_contactos_contactos_id
+-- rutas_turisticas --
+  id  ->  rutas_turisticas_id
+  nombre  ->  rutas_turisticas_nombre
+  state  ->  rutas_turisticas_state
+  createdAt  ->  rutas_turisticas_created_at
+  updateAt  ->  rutas_turisticas_update_at
+  usuarioId  ->  rutas_turisticas_usuario_id
+-- rutas_turisticas_atracciones_atracciones --
+  rutasTuristicasId  ->  rutas_turisticas_atracciones_atracciones_rutas_turisticas_id
+  atraccionesId  ->  rutas_turisticas_atracciones_atracciones_atracciones_id
+-- eventos_hoteles_hoteles --
+  eventosId  ->  eventos_hoteles_hoteles_eventos_id
+  hotelesId  ->  eventos_hoteles_hoteles_hoteles_id
+-- eventos_oficinas_oficinas_turisticas --
+  eventosId  ->  eventos_oficinas_oficinas_turisticas_eventos_id
+  oficinasTuristicasId  ->  eventos_oficinas_oficinas_turisticas_oficinas_turisticas_id
+-- eventos_operadores_operadores_turisticos --
+  eventosId  ->  eventos_operadores_operadores_turisticos_eventos_id
+  operadoresTuristicosId  ->  eventos_operadores_operadores_turisticos_operadores_id
+-- eventos_rentadoras_rentadoras_vehiculos --
+  eventosId  ->  eventos_rentadoras_rentadoras_vehiculos_eventos_id
+  rentadorasVehiculosId  ->  eventos_rentadoras_rentadoras_vehiculos_rentadoras_vehiculos_id
+-- eventos_restaurantes_restaurantes --
+  eventosId  ->  eventos_restaurantes_restaurantes_eventos_id
+  restaurantesId  ->  eventos_restaurantes_restaurantes_restaurantes_id
+-- imagenes_oficinas_turisticas --
+  id  ->  imagenes_oficinas_turisticas_id
+  nombre  ->  imagenes_oficinas_turisticas_nombre
+  descripcion  ->  imagenes_oficinas_turisticas_descripcion
+  url  ->  imagenes_oficinas_turisticas_url
+  nameUrl  ->  imagenes_oficinas_turisticas_name_url
+  state  ->  imagenes_oficinas_turisticas_state
+  createdAt  ->  imagenes_oficinas_turisticas_created_at
+  updateAt  ->  imagenes_oficinas_turisticas_update_at
+  oficinaTuristicaId  ->  imagenes_oficinas_turisticas_oficina_turistica_id
+-- imagenes_operadores_turisticos --
+  id  ->  imagenes_operadores_turisticos_id
+  nombre  ->  imagenes_operadores_turisticos_nombre
+  descripcion  ->  imagenes_operadores_turisticos_descripcion
+  url  ->  imagenes_operadores_turisticos_url
+  nameUrl  ->  imagenes_operadores_turisticos_name_url
+  state  ->  imagenes_operadores_turisticos_state
+  createdAt  ->  imagenes_operadores_turisticos_created_at
+  updateAt  ->  imagenes_operadores_turisticos_update_at
+  operadorTuristicoId  ->  imagenes_operadores_turisticos_operador_turistico_id
+-- imagenes_rentadoras_vehiculos --
+  id  ->  imagenes_rentadoras_vehiculos_id
+  nombre  ->  imagenes_rentadoras_vehiculos_nombre
+  descripcion  ->  imagenes_rentadoras_vehiculos_descripcion
+  url  ->  imagenes_rentadoras_vehiculos_url
+  nameUrl  ->  imagenes_rentadoras_vehiculos_name_url
+  state  ->  imagenes_rentadoras_vehiculos_state
+  createdAt  ->  imagenes_rentadoras_vehiculos_created_at
+  updateAt  ->  imagenes_rentadoras_vehiculos_update_at
+  rentadoraVehiculosId  ->  imagenes_rentadoras_vehiculos_rentadora_vehiculos_id
+-- imagenes_restaurantes --
+  id  ->  imagenes_restaurantes_id
+  nombre  ->  imagenes_restaurantes_nombre
+  descripcion  ->  imagenes_restaurantes_descripcion
+  url  ->  imagenes_restaurantes_url
+  nameUrl  ->  imagenes_restaurantes_name_url
+  state  ->  imagenes_restaurantes_state
+  createdAt  ->  imagenes_restaurantes_created_at
+  updateAt  ->  imagenes_restaurantes_update_at
+  restauranteId  ->  imagenes_restaurantes_restaurante_id
