@@ -1,0 +1,782 @@
+// ============================================================
+//  Rutas Turísticas Pérez Zeledón — Schema Prisma
+//  Transcrito desde BD_Rutas.sql (DDL de producción)
+//  37 tablas · 324 columnas · 49 llaves foráneas
+//
+//  Los nombres de tabla, índice y restricción (@@map / map:)
+//  se conservan EXACTOS respecto al DDL original, para que el
+//  baselining no genere deriva.
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------------
+//  Catálogos base
+// ------------------------------------------------------------
+
+model Usuarios {
+  id Int       @id @default(autoincrement()) @map("usuariosrutas_id")
+  nombre String?   @db.Text @map("usuariosrutas_nombre")
+  email String?   @db.Text @map("usuariosrutas_email")
+  password String?   @db.Text @map("usuariosrutas_password")
+  state String    @default("Active") @db.VarChar(255) @map("usuariosrutas_state")
+  rol String?   @db.Text @map("usuariosrutas_rol")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("usuariosrutas_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("usuariosrutas_update_at")
+
+  calificaciones  Calificaciones[]
+  rutasTuristicas RutasTuristicas[]
+
+  @@map("PZR_usuariosrutas")
+}
+
+model Categorias {
+  id Int       @id @default(autoincrement()) @map("categorias_id")
+  nombre String    @db.Text @map("categorias_nombre")
+  descripcion String    @db.Text @map("categorias_descripcion")
+  state String    @default("Active") @db.VarChar(255) @map("categorias_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("categorias_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("categorias_update_at")
+  nombreIngles String    @db.Text @map("categorias_nombre_ingles")
+  descripcionIngles String    @db.Text @map("categorias_descripcion_ingles")
+
+  atracciones AtraccionesCategorias[]
+  hoteles     HotelesCategorias[]
+
+  @@map("PZR_categorias")
+}
+
+model Contactos {
+  id Int       @id @default(autoincrement()) @map("contactos_id")
+  valor String    @db.Text @map("contactos_valor")
+  tipo String    @db.Text @map("contactos_tipo")
+  state String    @default("Active") @db.VarChar(255) @map("contactos_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("contactos_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("contactos_update_at")
+
+  atracciones          AtraccionesContactos[]
+  eventos              EventosContactos[]
+  hoteles              HotelesContactos[]
+  oficinasTuristicas   OficinasTuristicasContactos[]
+  operadoresTuristicos OperadoresTuristicosContactos[]
+  rentadorasVehiculos  RentadorasVehiculosContactos[]
+  restaurantes         RestaurantesContactos[]
+
+  @@map("PZR_contactos")
+}
+
+model Ubicaciones {
+  id Int       @id @default(autoincrement()) @map("ubicaciones_id")
+  provincia String    @db.Text @map("ubicaciones_provincia")
+  canton String    @db.Text @map("ubicaciones_canton")
+  distrito String    @db.Text @map("ubicaciones_distrito")
+  detalle String    @db.Text @map("ubicaciones_detalle")
+  latitud String    @db.Text @map("ubicaciones_latitud")
+  longitud String    @db.Text @map("ubicaciones_longitud")
+  state String    @default("Active") @db.VarChar(255) @map("ubicaciones_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("ubicaciones_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("ubicaciones_update_at")
+
+  atracciones          Atracciones[]
+  eventos              Eventos[]
+  hoteles              Hoteles[]
+  oficinasTuristicas   OficinasTuristicas[]
+  operadoresTuristicos OperadoresTuristicos[]
+  rentadorasVehiculos  RentadorasVehiculos[]
+  restaurantes         Restaurantes[]
+
+  @@map("PZR_ubicaciones")
+}
+
+model MensajesContactenos {
+  id Int       @id @default(autoincrement()) @map("mensajes_contactenos_id")
+  nombre String    @db.Text @map("mensajes_contactenos_nombre")
+  correo String    @db.Text @map("mensajes_contactenos_correo")
+  asunto String    @db.Text @map("mensajes_contactenos_asunto")
+  mensaje String    @db.Text @map("mensajes_contactenos_mensaje")
+  estado String    @db.Text @map("mensajes_contactenos_estado")
+  state String    @default("Active") @db.VarChar(255) @map("mensajes_contactenos_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("mensajes_contactenos_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("mensajes_contactenos_update_at")
+
+  @@map("PZR_mensajes_contactenos")
+}
+
+// ------------------------------------------------------------
+//  Atracciones
+// ------------------------------------------------------------
+
+model Atracciones {
+  id Int       @id @default(autoincrement()) @map("atracciones_id")
+  nombre String    @db.Text @map("atracciones_nombre")
+  descripcion String    @db.Text @map("atracciones_descripcion")
+  state String    @default("Active") @db.VarChar(255) @map("atracciones_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("atracciones_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("atracciones_update_at")
+  ubicacionId Int? @map("atracciones_ubicacion_id")
+
+  declaracionTuristica Boolean @default(false) @db.TinyInt @map("atracciones_declaracion_turistica")
+  descripcionIngles String  @db.Text @map("atracciones_descripcion_ingles")
+  permitenMascotas Boolean @default(false) @db.TinyInt @map("atracciones_permiten_mascotas")
+  permitenNinos Boolean @default(false) @db.TinyInt @map("atracciones_permiten_ninos")
+  discapacidadVisual Boolean @default(false) @db.TinyInt @map("atracciones_discapacidad_visual")
+  discapacidadAuditiva Boolean @default(false) @db.TinyInt @map("atracciones_discapacidad_auditiva")
+  discapacidadFisica Boolean @default(false) @db.TinyInt @map("atracciones_discapacidad_fisica")
+  discapacidadCognitiva Boolean @default(false) @db.TinyInt @map("atracciones_discapacidad_cognitiva")
+  discapacidadSicosocial Boolean @default(false) @db.TinyInt @map("atracciones_discapacidad_sicosocial")
+
+  permitenMascotasDescripcion String? @db.Text @map("atracciones_permiten_mascotas_descripcion")
+  permitenMascotasDescripcionIngles String? @db.Text @map("atracciones_permiten_mascotas_descripcion_ingles")
+  permitenNinosDescripcion String? @db.Text @map("atracciones_permiten_ninos_descripcion")
+  permitenNinosDescripcionIngles String? @db.Text @map("atracciones_permiten_ninos_descripcion_ingles")
+  discapacidadVisualDescripcion String? @db.Text @map("atracciones_discapacidad_visual_descripcion")
+  discapacidadVisualDescripcionIngles String? @db.Text @map("atracciones_discapacidad_visual_descripcion_ingles")
+  discapacidadAuditivaDescripcion String? @db.Text @map("atracciones_discapacidad_auditiva_descripcion")
+  discapacidadAuditivaDescripcionIngles String? @db.Text @map("atracciones_discapacidad_auditiva_descripcion_ingles")
+  discapacidadFisicaDescripcion String? @db.Text @map("atracciones_discapacidad_fisica_descripcion")
+  discapacidadFisicaDescripcionIngles String? @db.Text @map("atracciones_discapacidad_fisica_descripcion_ingles")
+  discapacidadCognitivaDescripcion String? @db.Text @map("atracciones_discapacidad_cognitiva_descripcion")
+  discapacidadCognitivaDescripcionIngles String? @db.Text @map("atracciones_discapacidad_cognitiva_descripcion_ingles")
+  discapacidadSicosocialDescripcion String? @db.Text @map("atracciones_discapacidad_sicosocial_descripcion")
+  discapacidadSicosocialDescripcionIngles String? @db.Text @map("atracciones_discapacidad_sicosocial_descripcion_ingles")
+
+  ubicacion Ubicaciones? @relation(fields: [ubicacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_81720e7cb4b389b5a76167ba237")
+
+  imagenes        Imagenes[]
+  calificaciones  Calificaciones[]
+  categorias      AtraccionesCategorias[]
+  contactos       AtraccionesContactos[]
+  eventos         EventosAtracciones[]
+  rutasTuristicas RutasTuristicasAtracciones[]
+
+  @@index([ubicacionId], map: "FK_81720e7cb4b389b5a76167ba237")
+  @@map("PZR_atracciones")
+}
+
+model AtraccionesCategorias {
+  atraccionesId Int @map("atracciones_categorias_categorias_atracciones_id")
+  categoriasId Int @map("atracciones_categorias_categorias_categorias_id")
+
+  atraccion Atracciones @relation(fields: [atraccionesId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_b4c7a088b70770e0ec7be60f464")
+  categoria Categorias  @relation(fields: [categoriasId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_3ebefb1668f46abefd185a777b1")
+
+  @@id([atraccionesId, categoriasId])
+  @@index([atraccionesId], map: "IDX_b4c7a088b70770e0ec7be60f46")
+  @@index([categoriasId], map: "IDX_3ebefb1668f46abefd185a777b")
+  @@map("PZR_atracciones_categorias_categorias")
+}
+
+model AtraccionesContactos {
+  atraccionesId Int @map("atracciones_contactos_contactos_atracciones_id")
+  contactosId Int @map("atracciones_contactos_contactos_contactos_id")
+
+  atraccion Atracciones @relation(fields: [atraccionesId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_10af72ec1291cce878685fe588a")
+  contacto  Contactos   @relation(fields: [contactosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_c59061cd2937f864a2c16919c9d")
+
+  @@id([atraccionesId, contactosId])
+  @@index([atraccionesId], map: "IDX_10af72ec1291cce878685fe588")
+  @@index([contactosId], map: "IDX_c59061cd2937f864a2c16919c9")
+  @@map("PZR_atracciones_contactos_contactos")
+}
+
+model Calificaciones {
+  id Int       @id @default(autoincrement()) @map("calificaciones_id")
+  descripcion String?   @db.Text @map("calificaciones_descripcion")
+  state String    @default("Active") @db.VarChar(255) @map("calificaciones_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("calificaciones_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("calificaciones_update_at")
+  usuarioId Int? @map("calificaciones_usuario_id")
+  atraccionId Int? @map("calificaciones_atraccion_id")
+
+  usuario   Usuarios?    @relation(fields: [usuarioId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_375603f03606312da8761092b02")
+  atraccion Atracciones? @relation(fields: [atraccionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_022fa75c069a1df0503780aae78")
+
+  @@index([usuarioId], map: "FK_375603f03606312da8761092b02")
+  @@index([atraccionId], map: "FK_022fa75c069a1df0503780aae78")
+  @@map("PZR_calificaciones")
+}
+
+model Imagenes {
+  id Int       @id @default(autoincrement()) @map("imagenes_id")
+  nombre String    @db.Text @map("imagenes_nombre")
+  descripcion String?   @db.Text @map("imagenes_descripcion")
+  url String    @db.Text @map("imagenes_url")
+  state String    @default("Active") @db.VarChar(255) @map("imagenes_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("imagenes_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("imagenes_update_at")
+  atraccionId Int? @map("imagenes_atraccion_id")
+  nameUrl String    @db.Text @map("imagenes_name_url")
+
+  atraccion Atracciones? @relation(fields: [atraccionId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_b3fdee2454758ed6d0cfc95ca59")
+
+  @@index([atraccionId], map: "FK_b3fdee2454758ed6d0cfc95ca59")
+  @@map("PZR_imagenes")
+}
+
+// ------------------------------------------------------------
+//  Eventos
+// ------------------------------------------------------------
+
+model Eventos {
+  id Int       @id @default(autoincrement()) @map("eventos_id")
+  nombre String    @db.Text @map("eventos_nombre")
+  nombreIngles String    @db.Text @map("eventos_nombre_ingles")
+  descripcion String    @db.Text @map("eventos_descripcion")
+  descripcionIngles String    @db.Text @map("eventos_descripcion_ingles")
+  fechaInicio DateTime? @default(now()) @db.Timestamp(6) @map("eventos_fecha_inicio")
+  fechaFin DateTime? @default(now()) @db.Timestamp(6) @map("eventos_fecha_fin")
+  mostrarFechaInicio DateTime? @default(now()) @db.Timestamp(6) @map("eventos_mostrar_fecha_inicio")
+  mostrarFechaFin DateTime? @default(now()) @db.Timestamp(6) @map("eventos_mostrar_fecha_fin")
+  state String    @default("Active") @db.VarChar(255) @map("eventos_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("eventos_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("eventos_update_at")
+  ubicacionId Int? @map("eventos_ubicacion_id")
+
+  ubicacion Ubicaciones? @relation(fields: [ubicacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_bf05ddd0161d427170cdfa79f6c")
+
+  imagenes             ImagenesEventos[]
+  atracciones          EventosAtracciones[]
+  contactos            EventosContactos[]
+  hoteles              EventosHoteles[]
+  oficinasTuristicas   EventosOficinas[]
+  operadoresTuristicos EventosOperadores[]
+  rentadorasVehiculos  EventosRentadoras[]
+  restaurantes         EventosRestaurantes[]
+
+  @@index([ubicacionId], map: "FK_bf05ddd0161d427170cdfa79f6c")
+  @@map("PZR_eventos")
+}
+
+model ImagenesEventos {
+  id Int       @id @default(autoincrement()) @map("imagenes_eventos_id")
+  nombre String    @db.Text @map("imagenes_eventos_nombre")
+  descripcion String?   @db.Text @map("imagenes_eventos_descripcion")
+  url String    @db.Text @map("imagenes_eventos_url")
+  nameUrl String    @db.Text @map("imagenes_eventos_name_url")
+  state String    @default("Active") @db.VarChar(255) @map("imagenes_eventos_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("imagenes_eventos_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("imagenes_eventos_update_at")
+  eventoId Int? @map("imagenes_eventos_evento_id")
+
+  evento Eventos? @relation(fields: [eventoId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_5392ae7cb65cef8b1d2ded15d67")
+
+  @@index([eventoId], map: "FK_5392ae7cb65cef8b1d2ded15d67")
+  @@map("PZR_imagenes_eventos")
+}
+
+model EventosAtracciones {
+  eventosId Int @map("eventos_atracciones_atracciones_eventos_id")
+  atraccionesId Int @map("eventos_atracciones_atracciones_atracciones_id")
+
+  evento    Eventos     @relation(fields: [eventosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_666f0ed4403c43b1262c364e72d")
+  atraccion Atracciones @relation(fields: [atraccionesId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_8f715781487c50afa6c73cc4aa0")
+
+  @@id([eventosId, atraccionesId])
+  @@index([eventosId], map: "IDX_666f0ed4403c43b1262c364e72")
+  @@index([atraccionesId], map: "IDX_8f715781487c50afa6c73cc4aa")
+  @@map("PZR_eventos_atracciones_atracciones")
+}
+
+model EventosContactos {
+  eventosId Int @map("eventos_contactos_contactos_eventos_id")
+  contactosId Int @map("eventos_contactos_contactos_contactos_id")
+
+  evento   Eventos   @relation(fields: [eventosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_8bbb6ee40efe4d42cb10ce999c6")
+  contacto Contactos @relation(fields: [contactosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_e1b95bd329d81074784ea97213d")
+
+  @@id([eventosId, contactosId])
+  @@index([eventosId], map: "IDX_8bbb6ee40efe4d42cb10ce999c")
+  @@index([contactosId], map: "IDX_e1b95bd329d81074784ea97213")
+  @@map("PZR_eventos_contactos_contactos")
+}
+
+model EventosHoteles {
+  eventosId Int @map("eventos_hoteles_hoteles_eventos_id")
+  hotelesId Int @map("eventos_hoteles_hoteles_hoteles_id")
+
+  evento Eventos @relation(fields: [eventosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_cf0ba38c98ced0ecfce998d8366")
+  hotel  Hoteles @relation(fields: [hotelesId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_e69dceca98231fce8b9353507e0")
+
+  @@id([eventosId, hotelesId])
+  @@index([eventosId], map: "IDX_cf0ba38c98ced0ecfce998d836")
+  @@index([hotelesId], map: "IDX_e69dceca98231fce8b9353507e")
+  @@map("PZR_eventos_hoteles_hoteles")
+}
+
+model EventosOficinas {
+  eventosId Int @map("eventos_oficinas_oficinas_turisticas_eventos_id")
+  oficinasTuristicasId Int @map("eventos_oficinas_oficinas_turisticas_oficinas_turisticas_id")
+
+  evento  Eventos            @relation(fields: [eventosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_19d8c617422d1a2485f580dd60e")
+  oficina OficinasTuristicas @relation(fields: [oficinasTuristicasId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_8665d7523878f878b06a0ec00a7")
+
+  @@id([eventosId, oficinasTuristicasId])
+  @@index([eventosId], map: "IDX_19d8c617422d1a2485f580dd60")
+  @@index([oficinasTuristicasId], map: "IDX_8665d7523878f878b06a0ec00a")
+  @@map("PZR_eventos_oficinas_oficinas_turisticas")
+}
+
+model EventosOperadores {
+  eventosId Int @map("eventos_operadores_operadores_turisticos_eventos_id")
+  operadoresTuristicosId Int @map("eventos_operadores_operadores_turisticos_operadores_id")
+
+  evento   Eventos              @relation(fields: [eventosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_e492720ae061baace4ff898c416")
+  operador OperadoresTuristicos @relation(fields: [operadoresTuristicosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_a36198809aadc7ccd10b7030b0b")
+
+  @@id([eventosId, operadoresTuristicosId])
+  @@index([eventosId], map: "IDX_e492720ae061baace4ff898c41")
+  @@index([operadoresTuristicosId], map: "IDX_a36198809aadc7ccd10b7030b0")
+  @@map("PZR_eventos_operadores_operadores_turisticos")
+}
+
+model EventosRentadoras {
+  eventosId Int @map("eventos_rentadoras_rentadoras_vehiculos_eventos_id")
+  rentadorasVehiculosId Int @map("eventos_rentadoras_rentadoras_vehiculos_rentadoras_vehiculos_id")
+
+  evento    Eventos             @relation(fields: [eventosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_bebb2057523c25ed9e147e3933f")
+  rentadora RentadorasVehiculos @relation(fields: [rentadorasVehiculosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_9f355d165c718c07b70a160351d")
+
+  @@id([eventosId, rentadorasVehiculosId])
+  @@index([eventosId], map: "IDX_bebb2057523c25ed9e147e3933")
+  @@index([rentadorasVehiculosId], map: "IDX_9f355d165c718c07b70a160351")
+  @@map("PZR_eventos_rentadoras_rentadoras_vehiculos")
+}
+
+model EventosRestaurantes {
+  eventosId Int @map("eventos_restaurantes_restaurantes_eventos_id")
+  restaurantesId Int @map("eventos_restaurantes_restaurantes_restaurantes_id")
+
+  evento      Eventos      @relation(fields: [eventosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_639653f542f2c99992342a2c742")
+  restaurante Restaurantes @relation(fields: [restaurantesId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_78d1a5a9aed0f3299ebddd04e48")
+
+  @@id([eventosId, restaurantesId])
+  @@index([eventosId], map: "IDX_639653f542f2c99992342a2c74")
+  @@index([restaurantesId], map: "IDX_78d1a5a9aed0f3299ebddd04e4")
+  @@map("PZR_eventos_restaurantes_restaurantes")
+}
+
+// ------------------------------------------------------------
+//  Hoteles
+// ------------------------------------------------------------
+
+model Hoteles {
+  id Int       @id @default(autoincrement()) @map("hoteles_id")
+  nombre String    @db.Text @map("hoteles_nombre")
+  state String    @default("Active") @db.VarChar(255) @map("hoteles_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("hoteles_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("hoteles_update_at")
+  ubicacionId Int? @map("hoteles_ubicacion_id")
+  descripcion String    @db.Text @map("hoteles_descripcion")
+
+  declaracionTuristica Boolean @default(false) @db.TinyInt @map("hoteles_declaracion_turistica")
+  descripcionIngles String  @db.Text @map("hoteles_descripcion_ingles")
+  permitenMascotas Boolean @default(false) @db.TinyInt @map("hoteles_permiten_mascotas")
+  permitenNinos Boolean @default(false) @db.TinyInt @map("hoteles_permiten_ninos")
+  discapacidadVisual Boolean @default(false) @db.TinyInt @map("hoteles_discapacidad_visual")
+  discapacidadAuditiva Boolean @default(false) @db.TinyInt @map("hoteles_discapacidad_auditiva")
+  discapacidadFisica Boolean @default(false) @db.TinyInt @map("hoteles_discapacidad_fisica")
+  discapacidadCognitiva Boolean @default(false) @db.TinyInt @map("hoteles_discapacidad_cognitiva")
+  discapacidadSicosocial Boolean @default(false) @db.TinyInt @map("hoteles_discapacidad_sicosocial")
+
+  permitenMascotasDescripcion String? @db.Text @map("hoteles_permiten_mascotas_descripcion")
+  permitenMascotasDescripcionIngles String? @db.Text @map("hoteles_permiten_mascotas_descripcion_ingles")
+  permitenNinosDescripcion String? @db.Text @map("hoteles_permiten_ninos_descripcion")
+  permitenNinosDescripcionIngles String? @db.Text @map("hoteles_permiten_ninos_descripcion_ingles")
+  discapacidadVisualDescripcion String? @db.Text @map("hoteles_discapacidad_visual_descripcion")
+  discapacidadVisualDescripcionIngles String? @db.Text @map("hoteles_discapacidad_visual_descripcion_ingles")
+  discapacidadAuditivaDescripcion String? @db.Text @map("hoteles_discapacidad_auditiva_descripcion")
+  discapacidadAuditivaDescripcionIngles String? @db.Text @map("hoteles_discapacidad_auditiva_descripcion_ingles")
+  discapacidadFisicaDescripcion String? @db.Text @map("hoteles_discapacidad_fisica_descripcion")
+  discapacidadFisicaDescripcionIngles String? @db.Text @map("hoteles_discapacidad_fisica_descripcion_ingles")
+  discapacidadCognitivaDescripcion String? @db.Text @map("hoteles_discapacidad_cognitiva_descripcion")
+  discapacidadCognitivaDescripcionIngles String? @db.Text @map("hoteles_discapacidad_cognitiva_descripcion_ingles")
+  discapacidadSicosocialDescripcion String? @db.Text @map("hoteles_discapacidad_sicosocial_descripcion")
+  discapacidadSicosocialDescripcionIngles String? @db.Text @map("hoteles_discapacidad_sicosocial_descripcion_ingles")
+
+  ubicacion Ubicaciones? @relation(fields: [ubicacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_65a1aeff5910e2a866a91a30c7e")
+
+  imagenes   ImagenesHoteles[]
+  categorias HotelesCategorias[]
+  contactos  HotelesContactos[]
+  eventos    EventosHoteles[]
+
+  @@index([ubicacionId], map: "FK_65a1aeff5910e2a866a91a30c7e")
+  @@map("PZR_hoteles")
+}
+
+model ImagenesHoteles {
+  id Int       @id @default(autoincrement()) @map("imagenes_hoteles_id")
+  nombre String    @db.Text @map("imagenes_hoteles_nombre")
+  descripcion String?   @db.Text @map("imagenes_hoteles_descripcion")
+  url String    @db.Text @map("imagenes_hoteles_url")
+  nameUrl String    @db.Text @map("imagenes_hoteles_name_url")
+  state String    @default("Active") @db.VarChar(255) @map("imagenes_hoteles_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("imagenes_hoteles_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("imagenes_hoteles_update_at")
+  hotelId Int? @map("imagenes_hoteles_hotel_id")
+
+  hotel Hoteles? @relation(fields: [hotelId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_e6b0d8526441eedbed48b1344ec")
+
+  @@index([hotelId], map: "FK_e6b0d8526441eedbed48b1344ec")
+  @@map("PZR_imagenes_hoteles")
+}
+
+model HotelesCategorias {
+  hotelesId Int @map("hoteles_categorias_categorias_hoteles_id")
+  categoriasId Int @map("hoteles_categorias_categorias_categorias_id")
+
+  hotel     Hoteles    @relation(fields: [hotelesId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_f12ca8b71b70c8e7229a03cabe4")
+  categoria Categorias @relation(fields: [categoriasId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_2a09a2fdedd122a7cb936916b8b")
+
+  @@id([hotelesId, categoriasId])
+  @@index([hotelesId], map: "IDX_f12ca8b71b70c8e7229a03cabe")
+  @@index([categoriasId], map: "IDX_2a09a2fdedd122a7cb936916b8")
+  @@map("PZR_hoteles_categorias_categorias")
+}
+
+model HotelesContactos {
+  hotelesId Int @map("hoteles_contactos_contactos_hoteles_id")
+  contactosId Int @map("hoteles_contactos_contactos_contactos_id")
+
+  hotel    Hoteles   @relation(fields: [hotelesId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_d1b33fa3cf01e44b515707f24e9")
+  contacto Contactos @relation(fields: [contactosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_a42447069818c50ba8a47461da7")
+
+  @@id([hotelesId, contactosId])
+  @@index([hotelesId], map: "IDX_d1b33fa3cf01e44b515707f24e")
+  @@index([contactosId], map: "IDX_a42447069818c50ba8a47461da")
+  @@map("PZR_hoteles_contactos_contactos")
+}
+
+// ------------------------------------------------------------
+//  Restaurantes
+// ------------------------------------------------------------
+
+model Restaurantes {
+  id Int       @id @default(autoincrement()) @map("restaurantes_id")
+  nombre String    @db.Text @map("restaurantes_nombre")
+  state String    @default("Active") @db.VarChar(255) @map("restaurantes_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("restaurantes_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("restaurantes_update_at")
+  ubicacionId Int? @map("restaurantes_ubicacion_id")
+
+  declaracionTuristica Boolean @default(false) @db.TinyInt @map("restaurantes_declaracion_turistica")
+  descripcion String  @db.Text @map("restaurantes_descripcion")
+  descripcionIngles String  @db.Text @map("restaurantes_descripcion_ingles")
+  permitenMascotas Boolean @default(false) @db.TinyInt @map("restaurantes_permiten_mascotas")
+  permitenNinos Boolean @default(false) @db.TinyInt @map("restaurantes_permiten_ninos")
+  discapacidadVisual Boolean @default(false) @db.TinyInt @map("restaurantes_discapacidad_visual")
+  discapacidadAuditiva Boolean @default(false) @db.TinyInt @map("restaurantes_discapacidad_auditiva")
+  discapacidadFisica Boolean @default(false) @db.TinyInt @map("restaurantes_discapacidad_fisica")
+  discapacidadCognitiva Boolean @default(false) @db.TinyInt @map("restaurantes_discapacidad_cognitiva")
+  discapacidadSicosocial Boolean @default(false) @db.TinyInt @map("restaurantes_discapacidad_sicosocial")
+
+  permitenMascotasDescripcion String? @db.Text @map("restaurantes_permiten_mascotas_descripcion")
+  permitenMascotasDescripcionIngles String? @db.Text @map("restaurantes_permiten_mascotas_descripcion_ingles")
+  permitenNinosDescripcion String? @db.Text @map("restaurantes_permiten_ninos_descripcion")
+  permitenNinosDescripcionIngles String? @db.Text @map("restaurantes_permiten_ninos_descripcion_ingles")
+  discapacidadVisualDescripcion String? @db.Text @map("restaurantes_discapacidad_visual_descripcion")
+  discapacidadVisualDescripcionIngles String? @db.Text @map("restaurantes_discapacidad_visual_descripcion_ingles")
+  discapacidadAuditivaDescripcion String? @db.Text @map("restaurantes_discapacidad_auditiva_descripcion")
+  discapacidadAuditivaDescripcionIngles String? @db.Text @map("restaurantes_discapacidad_auditiva_descripcion_ingles")
+  discapacidadFisicaDescripcion String? @db.Text @map("restaurantes_discapacidad_fisica_descripcion")
+  discapacidadFisicaDescripcionIngles String? @db.Text @map("restaurantes_discapacidad_fisica_descripcion_ingles")
+  discapacidadCognitivaDescripcion String? @db.Text @map("restaurantes_discapacidad_cognitiva_descripcion")
+  discapacidadCognitivaDescripcionIngles String? @db.Text @map("restaurantes_discapacidad_cognitiva_descripcion_ingles")
+  discapacidadSicosocialDescripcion String? @db.Text @map("restaurantes_discapacidad_sicosocial_descripcion")
+  discapacidadSicosocialDescripcionIngles String? @db.Text @map("restaurantes_discapacidad_sicosocial_descripcion_ingles")
+
+  ubicacion Ubicaciones? @relation(fields: [ubicacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_8b87c9e6ac61922720c1c372965")
+
+  imagenes  ImagenesRestaurantes[]
+  contactos RestaurantesContactos[]
+  eventos   EventosRestaurantes[]
+
+  @@index([ubicacionId], map: "FK_8b87c9e6ac61922720c1c372965")
+  @@map("PZR_restaurantes")
+}
+
+model ImagenesRestaurantes {
+  id Int       @id @default(autoincrement()) @map("imagenes_restaurantes_id")
+  nombre String    @db.Text @map("imagenes_restaurantes_nombre")
+  descripcion String?   @db.Text @map("imagenes_restaurantes_descripcion")
+  url String    @db.Text @map("imagenes_restaurantes_url")
+  nameUrl String    @db.Text @map("imagenes_restaurantes_name_url")
+  state String    @default("Active") @db.VarChar(255) @map("imagenes_restaurantes_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("imagenes_restaurantes_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("imagenes_restaurantes_update_at")
+  restauranteId Int? @map("imagenes_restaurantes_restaurante_id")
+
+  restaurante Restaurantes? @relation(fields: [restauranteId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_a161e4d5c01b97fa8ff0b9b9349")
+
+  @@index([restauranteId], map: "FK_a161e4d5c01b97fa8ff0b9b9349")
+  @@map("PZR_imagenes_restaurantes")
+}
+
+model RestaurantesContactos {
+  restaurantesId Int @map("restaurantes_contactos_contactos_restaurantes_id")
+  contactosId Int @map("restaurantes_contactos_contactos_contactos_id")
+
+  restaurante Restaurantes @relation(fields: [restaurantesId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_3a540c48e528af870b4aa8b4a8d")
+  contacto    Contactos    @relation(fields: [contactosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_cf442cab6d9957791812dc9350c")
+
+  @@id([restaurantesId, contactosId])
+  @@index([restaurantesId], map: "IDX_3a540c48e528af870b4aa8b4a8")
+  @@index([contactosId], map: "IDX_cf442cab6d9957791812dc9350")
+  @@map("PZR_restaurantes_contactos_contactos")
+}
+
+// ------------------------------------------------------------
+//  Oficinas turísticas
+// ------------------------------------------------------------
+
+model OficinasTuristicas {
+  id Int       @id @default(autoincrement()) @map("oficinas_turisticas_id")
+  nombre String    @db.Text @map("oficinas_turisticas_nombre")
+  nombreEncargado String    @db.Text @map("oficinas_turisticas_nombre_encargado")
+  descripcion String    @db.Text @map("oficinas_turisticas_descripcion")
+  state String    @default("Active") @db.VarChar(255) @map("oficinas_turisticas_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("oficinas_turisticas_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("oficinas_turisticas_update_at")
+  ubicacionId Int? @map("oficinas_turisticas_ubicacion_id")
+
+  declaracionTuristica Boolean @default(false) @db.TinyInt @map("oficinas_turisticas_declaracion_turistica")
+  descripcionIngles String  @db.Text @map("oficinas_turisticas_descripcion_ingles")
+  discapacidadVisual Boolean @default(false) @db.TinyInt @map("oficinas_turisticas_discapacidad_visual")
+  discapacidadAuditiva Boolean @default(false) @db.TinyInt @map("oficinas_turisticas_discapacidad_auditiva")
+  discapacidadFisica Boolean @default(false) @db.TinyInt @map("oficinas_turisticas_discapacidad_fisica")
+  discapacidadCognitiva Boolean @default(false) @db.TinyInt @map("oficinas_turisticas_discapacidad_cognitiva")
+  discapacidadSicosocial Boolean @default(false) @db.TinyInt @map("oficinas_turisticas_discapacidad_sicosocial")
+
+  discapacidadVisualDescripcion String? @db.Text @map("oficinas_turisticas_discapacidad_visual_descripcion")
+  discapacidadVisualDescripcionIngles String? @db.Text @map("oficinas_turisticas_discapacidad_visual_descripcion_ingles")
+  discapacidadAuditivaDescripcion String? @db.Text @map("oficinas_turisticas_discapacidad_auditiva_descripcion")
+  discapacidadAuditivaDescripcionIngles String? @db.Text @map("oficinas_turisticas_discapacidad_auditiva_descripcion_ingles")
+  discapacidadFisicaDescripcion String? @db.Text @map("oficinas_turisticas_discapacidad_fisica_descripcion")
+  discapacidadFisicaDescripcionIngles String? @db.Text @map("oficinas_turisticas_discapacidad_fisica_descripcion_ingles")
+  discapacidadCognitivaDescripcion String? @db.Text @map("oficinas_turisticas_discapacidad_cognitiva_descripcion")
+  discapacidadCognitivaDescripcionIngles String? @db.Text @map("oficinas_turisticas_discapacidad_cognitiva_descripcion_ingles")
+  discapacidadSicosocialDescripcion String? @db.Text @map("oficinas_turisticas_discapacidad_sicosocial_descripcion")
+  discapacidadSicosocialDescripcionIngles String? @db.Text @map("oficinas_turisticas_discapacidad_sicosocial_descripcion_ingles")
+
+  ubicacion Ubicaciones? @relation(fields: [ubicacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_9005a5700caf9e762401e65bc4b")
+
+  imagenes  ImagenesOficinasTuristicas[]
+  contactos OficinasTuristicasContactos[]
+  eventos   EventosOficinas[]
+
+  @@index([ubicacionId], map: "FK_9005a5700caf9e762401e65bc4b")
+  @@map("PZR_oficinas_turisticas")
+}
+
+model ImagenesOficinasTuristicas {
+  id Int       @id @default(autoincrement()) @map("imagenes_oficinas_turisticas_id")
+  nombre String    @db.Text @map("imagenes_oficinas_turisticas_nombre")
+  descripcion String?   @db.Text @map("imagenes_oficinas_turisticas_descripcion")
+  url String    @db.Text @map("imagenes_oficinas_turisticas_url")
+  nameUrl String    @db.Text @map("imagenes_oficinas_turisticas_name_url")
+  state String    @default("Active") @db.VarChar(255) @map("imagenes_oficinas_turisticas_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("imagenes_oficinas_turisticas_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("imagenes_oficinas_turisticas_update_at")
+  oficinaTuristicaId Int? @map("imagenes_oficinas_turisticas_oficina_turistica_id")
+
+  oficina OficinasTuristicas? @relation(fields: [oficinaTuristicaId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_f77b7cd43e05b9cd539d1985909")
+
+  @@index([oficinaTuristicaId], map: "FK_f77b7cd43e05b9cd539d1985909")
+  @@map("PZR_imagenes_oficinas_turisticas")
+}
+
+model OficinasTuristicasContactos {
+  oficinasTuristicasId Int @map("oficinas_turisticas_contactos_contactos_oficinas_turisticas_id")
+  contactosId Int @map("oficinas_turisticas_contactos_contactos_contactos_id")
+
+  oficina  OficinasTuristicas @relation(fields: [oficinasTuristicasId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_42f2c3be59b324bdd019ab14fcc")
+  contacto Contactos          @relation(fields: [contactosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_e04ff379e1d18820b29102ab4e8")
+
+  @@id([oficinasTuristicasId, contactosId])
+  @@index([oficinasTuristicasId], map: "IDX_42f2c3be59b324bdd019ab14fc")
+  @@index([contactosId], map: "IDX_e04ff379e1d18820b29102ab4e")
+  @@map("PZR_oficinas_turisticas_contactos_contactos")
+}
+
+// ------------------------------------------------------------
+//  Operadores turísticos
+// ------------------------------------------------------------
+
+model OperadoresTuristicos {
+  id Int       @id @default(autoincrement()) @map("operadores_turisticos_id")
+  nombre String    @db.Text @map("operadores_turisticos_nombre")
+  descripcion String    @db.Text @map("operadores_turisticos_descripcion")
+  state String    @default("Active") @db.VarChar(255) @map("operadores_turisticos_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("operadores_turisticos_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("operadores_turisticos_update_at")
+  ubicacionId Int? @map("operadores_turisticos_ubicacion_id")
+
+  declaracionTuristica Boolean @default(false) @db.TinyInt @map("operadores_turisticos_declaracion_turistica")
+  descripcionIngles String  @db.Text @map("operadores_turisticos_descripcion_ingles")
+  discapacidadVisual Boolean @default(false) @db.TinyInt @map("operadores_turisticos_discapacidad_visual")
+  discapacidadAuditiva Boolean @default(false) @db.TinyInt @map("operadores_turisticos_discapacidad_auditiva")
+  discapacidadFisica Boolean @default(false) @db.TinyInt @map("operadores_turisticos_discapacidad_fisica")
+  discapacidadCognitiva Boolean @default(false) @db.TinyInt @map("operadores_turisticos_discapacidad_cognitiva")
+  discapacidadSicosocial Boolean @default(false) @db.TinyInt @map("operadores_turisticos_discapacidad_sicosocial")
+
+  discapacidadVisualDescripcion String? @db.Text @map("operadores_turisticos_discapacidad_visual_descripcion")
+  discapacidadVisualDescripcionIngles String? @db.Text @map("operadores_turisticos_discapacidad_visual_descripcion_ingles")
+  discapacidadAuditivaDescripcion String? @db.Text @map("operadores_turisticos_discapacidad_auditiva_descripcion")
+  discapacidadAuditivaDescripcionIngles String? @db.Text @map("operadores_turisticos_discapacidad_auditiva_descripcion_ingles")
+  discapacidadFisicaDescripcion String? @db.Text @map("operadores_turisticos_discapacidad_fisica_descripcion")
+  discapacidadFisicaDescripcionIngles String? @db.Text @map("operadores_turisticos_discapacidad_fisica_descripcion_ingles")
+  discapacidadCognitivaDescripcion String? @db.Text @map("operadores_turisticos_discapacidad_cognitiva_descripcion")
+  discapacidadCognitivaDescripcionIngles String? @db.Text @map("operadores_turisticos_discapacidad_cognitiva_descripcion_ingles")
+  discapacidadSicosocialDescripcion String? @db.Text @map("operadores_turisticos_discapacidad_sicosocial_descripcion")
+  discapacidadSicosocialDescripcionIngles String? @db.Text @map("operadores_turisticos_discapacidad_sicosocial_descripcion_ingles")
+
+  ubicacion Ubicaciones? @relation(fields: [ubicacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_01037fa45d53750b6b88b3bab2e")
+
+  imagenes  ImagenesOperadoresTuristicos[]
+  contactos OperadoresTuristicosContactos[]
+  eventos   EventosOperadores[]
+
+  @@index([ubicacionId], map: "FK_01037fa45d53750b6b88b3bab2e")
+  @@map("PZR_operadores_turisticos")
+}
+
+model ImagenesOperadoresTuristicos {
+  id Int       @id @default(autoincrement()) @map("imagenes_operadores_turisticos_id")
+  nombre String    @db.Text @map("imagenes_operadores_turisticos_nombre")
+  descripcion String?   @db.Text @map("imagenes_operadores_turisticos_descripcion")
+  url String    @db.Text @map("imagenes_operadores_turisticos_url")
+  nameUrl String    @db.Text @map("imagenes_operadores_turisticos_name_url")
+  state String    @default("Active") @db.VarChar(255) @map("imagenes_operadores_turisticos_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("imagenes_operadores_turisticos_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("imagenes_operadores_turisticos_update_at")
+  operadorTuristicoId Int? @map("imagenes_operadores_turisticos_operador_turistico_id")
+
+  operador OperadoresTuristicos? @relation(fields: [operadorTuristicoId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_a495ebc0a9a02901df63bc5e491")
+
+  @@index([operadorTuristicoId], map: "FK_a495ebc0a9a02901df63bc5e491")
+  @@map("PZR_imagenes_operadores_turisticos")
+}
+
+model OperadoresTuristicosContactos {
+  operadoresTuristicosId Int @map("operadores_turisticos_contactos_contactos_operadores_id")
+  contactosId Int @map("operadores_turisticos_contactos_contactos_contactos_id")
+
+  operador OperadoresTuristicos @relation(fields: [operadoresTuristicosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_8af59eba939cf043966cda6b401")
+  contacto Contactos            @relation(fields: [contactosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_55edcc8427b39b606d861aa0ab0")
+
+  @@id([operadoresTuristicosId, contactosId])
+  @@index([operadoresTuristicosId], map: "IDX_8af59eba939cf043966cda6b40")
+  @@index([contactosId], map: "IDX_55edcc8427b39b606d861aa0ab")
+  @@map("PZR_operadores_turisticos_contactos_contactos")
+}
+
+// ------------------------------------------------------------
+//  Rentadoras de vehículos
+// ------------------------------------------------------------
+
+model RentadorasVehiculos {
+  id Int       @id @default(autoincrement()) @map("rentadoras_vehiculos_id")
+  nombre String    @db.Text @map("rentadoras_vehiculos_nombre")
+  descripcion String    @db.Text @map("rentadoras_vehiculos_descripcion")
+  state String    @default("Active") @db.VarChar(255) @map("rentadoras_vehiculos_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("rentadoras_vehiculos_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("rentadoras_vehiculos_update_at")
+  ubicacionId Int? @map("rentadoras_vehiculos_ubicacion_id")
+
+  descripcionIngles String  @db.Text @map("rentadoras_vehiculos_descripcion_ingles")
+  discapacidadVisual Boolean @default(false) @db.TinyInt @map("rentadoras_vehiculos_discapacidad_visual")
+  discapacidadAuditiva Boolean @default(false) @db.TinyInt @map("rentadoras_vehiculos_discapacidad_auditiva")
+  discapacidadFisica Boolean @default(false) @db.TinyInt @map("rentadoras_vehiculos_discapacidad_fisica")
+  discapacidadCognitiva Boolean @default(false) @db.TinyInt @map("rentadoras_vehiculos_discapacidad_cognitiva")
+  discapacidadSicosocial Boolean @default(false) @db.TinyInt @map("rentadoras_vehiculos_discapacidad_sicosocial")
+
+  discapacidadVisualDescripcion String? @db.Text @map("rentadoras_vehiculos_discapacidad_visual_descripcion")
+  discapacidadVisualDescripcionIngles String? @db.Text @map("rentadoras_vehiculos_discapacidad_visual_descripcion_ingles")
+  discapacidadAuditivaDescripcion String? @db.Text @map("rentadoras_vehiculos_discapacidad_auditiva_descripcion")
+  discapacidadAuditivaDescripcionIngles String? @db.Text @map("rentadoras_vehiculos_discapacidad_auditiva_descripcion_ingles")
+  discapacidadFisicaDescripcion String? @db.Text @map("rentadoras_vehiculos_discapacidad_fisica_descripcion")
+  discapacidadFisicaDescripcionIngles String? @db.Text @map("rentadoras_vehiculos_discapacidad_fisica_descripcion_ingles")
+  discapacidadCognitivaDescripcion String? @db.Text @map("rentadoras_vehiculos_discapacidad_cognitiva_descripcion")
+  discapacidadCognitivaDescripcionIngles String? @db.Text @map("rentadoras_vehiculos_discapacidad_cognitiva_descripcion_ingles")
+  discapacidadSicosocialDescripcion String? @db.Text @map("rentadoras_vehiculos_discapacidad_sicosocial_descripcion")
+  discapacidadSicosocialDescripcionIngles String? @db.Text @map("rentadoras_vehiculos_discapacidad_sicosocial_descripcion_ingles")
+
+  ubicacion Ubicaciones? @relation(fields: [ubicacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_addce49626c69818e9698ec19a6")
+
+  imagenes  ImagenesRentadorasVehiculos[]
+  contactos RentadorasVehiculosContactos[]
+  eventos   EventosRentadoras[]
+
+  @@index([ubicacionId], map: "FK_addce49626c69818e9698ec19a6")
+  @@map("PZR_rentadoras_vehiculos")
+}
+
+model ImagenesRentadorasVehiculos {
+  id Int       @id @default(autoincrement()) @map("imagenes_rentadoras_vehiculos_id")
+  nombre String    @db.Text @map("imagenes_rentadoras_vehiculos_nombre")
+  descripcion String?   @db.Text @map("imagenes_rentadoras_vehiculos_descripcion")
+  url String    @db.Text @map("imagenes_rentadoras_vehiculos_url")
+  nameUrl String    @db.Text @map("imagenes_rentadoras_vehiculos_name_url")
+  state String    @default("Active") @db.VarChar(255) @map("imagenes_rentadoras_vehiculos_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("imagenes_rentadoras_vehiculos_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("imagenes_rentadoras_vehiculos_update_at")
+  rentadoraVehiculosId Int? @map("imagenes_rentadoras_vehiculos_rentadora_vehiculos_id")
+
+  rentadora RentadorasVehiculos? @relation(fields: [rentadoraVehiculosId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_8b3b613e62349cf6da3dad04d9a")
+
+  @@index([rentadoraVehiculosId], map: "FK_8b3b613e62349cf6da3dad04d9a")
+  @@map("PZR_imagenes_rentadoras_vehiculos")
+}
+
+model RentadorasVehiculosContactos {
+  rentadorasVehiculosId Int @map("rentadoras_vehiculos_contactos_contactos_rentadoras_vehiculos_id")
+  contactosId Int @map("rentadoras_vehiculos_contactos_contactos_contactos_id")
+
+  rentadora RentadorasVehiculos @relation(fields: [rentadorasVehiculosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_91315dfe359baa14665935565bc")
+  contacto  Contactos           @relation(fields: [contactosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_0f811d2caaf375ed4d8fc25b6a7")
+
+  @@id([rentadorasVehiculosId, contactosId])
+  @@index([rentadorasVehiculosId], map: "IDX_91315dfe359baa14665935565b")
+  @@index([contactosId], map: "IDX_0f811d2caaf375ed4d8fc25b6a")
+  @@map("PZR_rentadoras_vehiculos_contactos_contactos")
+}
+
+// ------------------------------------------------------------
+//  Rutas turísticas (personalizadas por usuario)
+// ------------------------------------------------------------
+
+model RutasTuristicas {
+  id Int       @id @default(autoincrement()) @map("rutas_turisticas_id")
+  nombre String    @db.Text @map("rutas_turisticas_nombre")
+  state String    @default("Active") @db.VarChar(255) @map("rutas_turisticas_state")
+  createdAt DateTime  @default(now()) @db.Timestamp(6) @map("rutas_turisticas_created_at")
+  updateAt DateTime? @db.Timestamp(0) @map("rutas_turisticas_update_at")
+  usuarioId Int? @map("rutas_turisticas_usuario_id")
+
+  usuario Usuarios? @relation(fields: [usuarioId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_db80f47a037a849dfb7b4d940ed")
+
+  atracciones RutasTuristicasAtracciones[]
+
+  @@index([usuarioId], map: "FK_db80f47a037a849dfb7b4d940ed")
+  @@map("PZR_rutas_turisticas")
+}
+
+model RutasTuristicasAtracciones {
+  rutasTuristicasId Int @map("rutas_turisticas_atracciones_atracciones_rutas_turisticas_id")
+  atraccionesId Int @map("rutas_turisticas_atracciones_atracciones_atracciones_id")
+
+  ruta      RutasTuristicas @relation(fields: [rutasTuristicasId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_e8c5d41e5f3ae4b36417731e570")
+  atraccion Atracciones     @relation(fields: [atraccionesId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_7959656f847a86fa9c075c5dc02")
+
+  @@id([rutasTuristicasId, atraccionesId])
+  @@index([rutasTuristicasId], map: "IDX_e8c5d41e5f3ae4b36417731e57")
+  @@index([atraccionesId], map: "IDX_7959656f847a86fa9c075c5dc0")
+  @@map("PZR_rutas_turisticas_atracciones_atracciones")
+}
