@@ -1,0 +1,782 @@
+// ============================================================
+//  Rutas Turísticas Pérez Zeledón — Schema Prisma
+//  Transcrito desde BD_Rutas.sql (DDL de producción)
+//  37 tablas · 324 columnas · 49 llaves foráneas
+//
+//  Los nombres de tabla, índice y restricción (@@map / map:)
+//  se conservan EXACTOS respecto al DDL original, para que el
+//  baselining no genere deriva.
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------------
+//  Catálogos base
+// ------------------------------------------------------------
+
+model Usuarios {
+  id        Int       @id @default(autoincrement())
+  nombre    String?   @db.Text
+  email     String?   @db.Text
+  password  String?   @db.Text
+  state     String    @default("Active") @db.VarChar(255)
+  rol       String?   @db.Text
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  updateAt  DateTime? @db.Timestamp(0)
+
+  calificaciones  Calificaciones[]
+  rutasTuristicas RutasTuristicas[]
+
+  @@map("UsuariosRutas")
+}
+
+model Categorias {
+  id                Int       @id @default(autoincrement())
+  nombre            String    @db.Text
+  descripcion       String    @db.Text
+  state             String    @default("Active") @db.VarChar(255)
+  createdAt         DateTime  @default(now()) @db.Timestamp(6)
+  updateAt          DateTime? @db.Timestamp(0)
+  nombreIngles      String    @db.Text
+  descripcionIngles String    @db.Text
+
+  atracciones AtraccionesCategorias[]
+  hoteles     HotelesCategorias[]
+
+  @@map("categorias")
+}
+
+model Contactos {
+  id        Int       @id @default(autoincrement())
+  valor     String    @db.Text
+  tipo      String    @db.Text
+  state     String    @default("Active") @db.VarChar(255)
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  updateAt  DateTime? @db.Timestamp(0)
+
+  atracciones          AtraccionesContactos[]
+  eventos              EventosContactos[]
+  hoteles              HotelesContactos[]
+  oficinasTuristicas   OficinasTuristicasContactos[]
+  operadoresTuristicos OperadoresTuristicosContactos[]
+  rentadorasVehiculos  RentadorasVehiculosContactos[]
+  restaurantes         RestaurantesContactos[]
+
+  @@map("contactos")
+}
+
+model Ubicaciones {
+  id        Int       @id @default(autoincrement())
+  provincia String    @db.Text
+  canton    String    @db.Text
+  distrito  String    @db.Text
+  detalle   String    @db.Text
+  latitud   String    @db.Text
+  longitud  String    @db.Text
+  state     String    @default("Active") @db.VarChar(255)
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  updateAt  DateTime? @db.Timestamp(0)
+
+  atracciones          Atracciones[]
+  eventos              Eventos[]
+  hoteles              Hoteles[]
+  oficinasTuristicas   OficinasTuristicas[]
+  operadoresTuristicos OperadoresTuristicos[]
+  rentadorasVehiculos  RentadorasVehiculos[]
+  restaurantes         Restaurantes[]
+
+  @@map("ubicaciones")
+}
+
+model MensajesContactenos {
+  id        Int       @id @default(autoincrement())
+  nombre    String    @db.Text
+  correo    String    @db.Text
+  asunto    String    @db.Text
+  mensaje   String    @db.Text
+  estado    String    @db.Text
+  state     String    @default("Active") @db.VarChar(255)
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  updateAt  DateTime? @db.Timestamp(0)
+
+  @@map("mensajes_contactenos")
+}
+
+// ------------------------------------------------------------
+//  Atracciones
+// ------------------------------------------------------------
+
+model Atracciones {
+  id          Int       @id @default(autoincrement())
+  nombre      String    @db.Text
+  descripcion String    @db.Text
+  state       String    @default("Active") @db.VarChar(255)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  updateAt    DateTime? @db.Timestamp(0)
+  ubicacionId Int?
+
+  declaracionTuristica   Boolean @default(false) @db.TinyInt
+  descripcionIngles      String  @db.Text
+  permitenMascotas       Boolean @default(false) @db.TinyInt
+  permitenNinos          Boolean @default(false) @db.TinyInt
+  discapacidadVisual     Boolean @default(false) @db.TinyInt
+  discapacidadAuditiva   Boolean @default(false) @db.TinyInt
+  discapacidadFisica     Boolean @default(false) @db.TinyInt
+  discapacidadCognitiva  Boolean @default(false) @db.TinyInt
+  discapacidadSicosocial Boolean @default(false) @db.TinyInt
+
+  permitenMascotasDescripcion             String? @db.Text
+  permitenMascotasDescripcionIngles       String? @db.Text
+  permitenNinosDescripcion                String? @db.Text
+  permitenNinosDescripcionIngles          String? @db.Text
+  discapacidadVisualDescripcion           String? @db.Text
+  discapacidadVisualDescripcionIngles     String? @db.Text
+  discapacidadAuditivaDescripcion         String? @db.Text
+  discapacidadAuditivaDescripcionIngles   String? @db.Text
+  discapacidadFisicaDescripcion           String? @db.Text
+  discapacidadFisicaDescripcionIngles     String? @db.Text
+  discapacidadCognitivaDescripcion        String? @db.Text
+  discapacidadCognitivaDescripcionIngles  String? @db.Text
+  discapacidadSicosocialDescripcion       String? @db.Text
+  discapacidadSicosocialDescripcionIngles String? @db.Text
+
+  ubicacion Ubicaciones? @relation(fields: [ubicacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_81720e7cb4b389b5a76167ba237")
+
+  imagenes        Imagenes[]
+  calificaciones  Calificaciones[]
+  categorias      AtraccionesCategorias[]
+  contactos       AtraccionesContactos[]
+  eventos         EventosAtracciones[]
+  rutasTuristicas RutasTuristicasAtracciones[]
+
+  @@index([ubicacionId], map: "FK_81720e7cb4b389b5a76167ba237")
+  @@map("atracciones")
+}
+
+model AtraccionesCategorias {
+  atraccionesId Int
+  categoriasId  Int
+
+  atraccion Atracciones @relation(fields: [atraccionesId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_b4c7a088b70770e0ec7be60f464")
+  categoria Categorias  @relation(fields: [categoriasId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_3ebefb1668f46abefd185a777b1")
+
+  @@id([atraccionesId, categoriasId])
+  @@index([atraccionesId], map: "IDX_b4c7a088b70770e0ec7be60f46")
+  @@index([categoriasId], map: "IDX_3ebefb1668f46abefd185a777b")
+  @@map("atracciones_categorias_categorias")
+}
+
+model AtraccionesContactos {
+  atraccionesId Int
+  contactosId   Int
+
+  atraccion Atracciones @relation(fields: [atraccionesId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_10af72ec1291cce878685fe588a")
+  contacto  Contactos   @relation(fields: [contactosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_c59061cd2937f864a2c16919c9d")
+
+  @@id([atraccionesId, contactosId])
+  @@index([atraccionesId], map: "IDX_10af72ec1291cce878685fe588")
+  @@index([contactosId], map: "IDX_c59061cd2937f864a2c16919c9")
+  @@map("atracciones_contactos_contactos")
+}
+
+model Calificaciones {
+  id          Int       @id @default(autoincrement())
+  descripcion String?   @db.Text
+  state       String    @default("Active") @db.VarChar(255)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  updateAt    DateTime? @db.Timestamp(0)
+  usuarioId   Int?
+  atraccionId Int?
+
+  usuario   Usuarios?    @relation(fields: [usuarioId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_375603f03606312da8761092b02")
+  atraccion Atracciones? @relation(fields: [atraccionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_022fa75c069a1df0503780aae78")
+
+  @@index([usuarioId], map: "FK_375603f03606312da8761092b02")
+  @@index([atraccionId], map: "FK_022fa75c069a1df0503780aae78")
+  @@map("calificaciones")
+}
+
+model Imagenes {
+  id          Int       @id @default(autoincrement())
+  nombre      String    @db.Text
+  descripcion String?   @db.Text
+  url         String    @db.Text
+  state       String    @default("Active") @db.VarChar(255)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  updateAt    DateTime? @db.Timestamp(0)
+  atraccionId Int?
+  nameUrl     String    @db.Text
+
+  atraccion Atracciones? @relation(fields: [atraccionId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_b3fdee2454758ed6d0cfc95ca59")
+
+  @@index([atraccionId], map: "FK_b3fdee2454758ed6d0cfc95ca59")
+  @@map("imagenes")
+}
+
+// ------------------------------------------------------------
+//  Eventos
+// ------------------------------------------------------------
+
+model Eventos {
+  id                 Int       @id @default(autoincrement())
+  nombre             String    @db.Text
+  nombreIngles       String    @db.Text
+  descripcion        String    @db.Text
+  descripcionIngles  String    @db.Text
+  fechaInicio        DateTime? @default(now()) @db.Timestamp(6)
+  fechaFin           DateTime? @default(now()) @db.Timestamp(6)
+  mostrarFechaInicio DateTime? @default(now()) @db.Timestamp(6)
+  mostrarFechaFin    DateTime? @default(now()) @db.Timestamp(6)
+  state              String    @default("Active") @db.VarChar(255)
+  createdAt          DateTime  @default(now()) @db.Timestamp(6)
+  updateAt           DateTime? @db.Timestamp(0)
+  ubicacionId        Int?
+
+  ubicacion Ubicaciones? @relation(fields: [ubicacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_bf05ddd0161d427170cdfa79f6c")
+
+  imagenes             ImagenesEventos[]
+  atracciones          EventosAtracciones[]
+  contactos            EventosContactos[]
+  hoteles              EventosHoteles[]
+  oficinasTuristicas   EventosOficinas[]
+  operadoresTuristicos EventosOperadores[]
+  rentadorasVehiculos  EventosRentadoras[]
+  restaurantes         EventosRestaurantes[]
+
+  @@index([ubicacionId], map: "FK_bf05ddd0161d427170cdfa79f6c")
+  @@map("eventos")
+}
+
+model ImagenesEventos {
+  id          Int       @id @default(autoincrement())
+  nombre      String    @db.Text
+  descripcion String?   @db.Text
+  url         String    @db.Text
+  nameUrl     String    @db.Text
+  state       String    @default("Active") @db.VarChar(255)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  updateAt    DateTime? @db.Timestamp(0)
+  eventoId    Int?
+
+  evento Eventos? @relation(fields: [eventoId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_5392ae7cb65cef8b1d2ded15d67")
+
+  @@index([eventoId], map: "FK_5392ae7cb65cef8b1d2ded15d67")
+  @@map("imagenes_eventos")
+}
+
+model EventosAtracciones {
+  eventosId     Int
+  atraccionesId Int
+
+  evento    Eventos     @relation(fields: [eventosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_666f0ed4403c43b1262c364e72d")
+  atraccion Atracciones @relation(fields: [atraccionesId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_8f715781487c50afa6c73cc4aa0")
+
+  @@id([eventosId, atraccionesId])
+  @@index([eventosId], map: "IDX_666f0ed4403c43b1262c364e72")
+  @@index([atraccionesId], map: "IDX_8f715781487c50afa6c73cc4aa")
+  @@map("eventos_atracciones_atracciones")
+}
+
+model EventosContactos {
+  eventosId   Int
+  contactosId Int
+
+  evento   Eventos   @relation(fields: [eventosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_8bbb6ee40efe4d42cb10ce999c6")
+  contacto Contactos @relation(fields: [contactosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_e1b95bd329d81074784ea97213d")
+
+  @@id([eventosId, contactosId])
+  @@index([eventosId], map: "IDX_8bbb6ee40efe4d42cb10ce999c")
+  @@index([contactosId], map: "IDX_e1b95bd329d81074784ea97213")
+  @@map("eventos_contactos_contactos")
+}
+
+model EventosHoteles {
+  eventosId Int
+  hotelesId Int
+
+  evento Eventos @relation(fields: [eventosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_cf0ba38c98ced0ecfce998d8366")
+  hotel  Hoteles @relation(fields: [hotelesId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_e69dceca98231fce8b9353507e0")
+
+  @@id([eventosId, hotelesId])
+  @@index([eventosId], map: "IDX_cf0ba38c98ced0ecfce998d836")
+  @@index([hotelesId], map: "IDX_e69dceca98231fce8b9353507e")
+  @@map("eventos_hoteles_hoteles")
+}
+
+model EventosOficinas {
+  eventosId            Int
+  oficinasTuristicasId Int
+
+  evento  Eventos            @relation(fields: [eventosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_19d8c617422d1a2485f580dd60e")
+  oficina OficinasTuristicas @relation(fields: [oficinasTuristicasId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_8665d7523878f878b06a0ec00a7")
+
+  @@id([eventosId, oficinasTuristicasId])
+  @@index([eventosId], map: "IDX_19d8c617422d1a2485f580dd60")
+  @@index([oficinasTuristicasId], map: "IDX_8665d7523878f878b06a0ec00a")
+  @@map("eventos_oficinas_oficinas_turisticas")
+}
+
+model EventosOperadores {
+  eventosId              Int
+  operadoresTuristicosId Int
+
+  evento   Eventos              @relation(fields: [eventosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_e492720ae061baace4ff898c416")
+  operador OperadoresTuristicos @relation(fields: [operadoresTuristicosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_a36198809aadc7ccd10b7030b0b")
+
+  @@id([eventosId, operadoresTuristicosId])
+  @@index([eventosId], map: "IDX_e492720ae061baace4ff898c41")
+  @@index([operadoresTuristicosId], map: "IDX_a36198809aadc7ccd10b7030b0")
+  @@map("eventos_operadores_operadores_turisticos")
+}
+
+model EventosRentadoras {
+  eventosId             Int
+  rentadorasVehiculosId Int
+
+  evento    Eventos             @relation(fields: [eventosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_bebb2057523c25ed9e147e3933f")
+  rentadora RentadorasVehiculos @relation(fields: [rentadorasVehiculosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_9f355d165c718c07b70a160351d")
+
+  @@id([eventosId, rentadorasVehiculosId])
+  @@index([eventosId], map: "IDX_bebb2057523c25ed9e147e3933")
+  @@index([rentadorasVehiculosId], map: "IDX_9f355d165c718c07b70a160351")
+  @@map("eventos_rentadoras_rentadoras_vehiculos")
+}
+
+model EventosRestaurantes {
+  eventosId      Int
+  restaurantesId Int
+
+  evento      Eventos      @relation(fields: [eventosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_639653f542f2c99992342a2c742")
+  restaurante Restaurantes @relation(fields: [restaurantesId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_78d1a5a9aed0f3299ebddd04e48")
+
+  @@id([eventosId, restaurantesId])
+  @@index([eventosId], map: "IDX_639653f542f2c99992342a2c74")
+  @@index([restaurantesId], map: "IDX_78d1a5a9aed0f3299ebddd04e4")
+  @@map("eventos_restaurantes_restaurantes")
+}
+
+// ------------------------------------------------------------
+//  Hoteles
+// ------------------------------------------------------------
+
+model Hoteles {
+  id          Int       @id @default(autoincrement())
+  nombre      String    @db.Text
+  state       String    @default("Active") @db.VarChar(255)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  updateAt    DateTime? @db.Timestamp(0)
+  ubicacionId Int?
+  descripcion String    @db.Text
+
+  declaracionTuristica   Boolean @default(false) @db.TinyInt
+  descripcionIngles      String  @db.Text
+  permitenMascotas       Boolean @default(false) @db.TinyInt
+  permitenNinos          Boolean @default(false) @db.TinyInt
+  discapacidadVisual     Boolean @default(false) @db.TinyInt
+  discapacidadAuditiva   Boolean @default(false) @db.TinyInt
+  discapacidadFisica     Boolean @default(false) @db.TinyInt
+  discapacidadCognitiva  Boolean @default(false) @db.TinyInt
+  discapacidadSicosocial Boolean @default(false) @db.TinyInt
+
+  permitenMascotasDescripcion             String? @db.Text
+  permitenMascotasDescripcionIngles       String? @db.Text
+  permitenNinosDescripcion                String? @db.Text
+  permitenNinosDescripcionIngles          String? @db.Text
+  discapacidadVisualDescripcion           String? @db.Text
+  discapacidadVisualDescripcionIngles     String? @db.Text
+  discapacidadAuditivaDescripcion         String? @db.Text
+  discapacidadAuditivaDescripcionIngles   String? @db.Text
+  discapacidadFisicaDescripcion           String? @db.Text
+  discapacidadFisicaDescripcionIngles     String? @db.Text
+  discapacidadCognitivaDescripcion        String? @db.Text
+  discapacidadCognitivaDescripcionIngles  String? @db.Text
+  discapacidadSicosocialDescripcion       String? @db.Text
+  discapacidadSicosocialDescripcionIngles String? @db.Text
+
+  ubicacion Ubicaciones? @relation(fields: [ubicacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_65a1aeff5910e2a866a91a30c7e")
+
+  imagenes   ImagenesHoteles[]
+  categorias HotelesCategorias[]
+  contactos  HotelesContactos[]
+  eventos    EventosHoteles[]
+
+  @@index([ubicacionId], map: "FK_65a1aeff5910e2a866a91a30c7e")
+  @@map("hoteles")
+}
+
+model ImagenesHoteles {
+  id          Int       @id @default(autoincrement())
+  nombre      String    @db.Text
+  descripcion String?   @db.Text
+  url         String    @db.Text
+  nameUrl     String    @db.Text
+  state       String    @default("Active") @db.VarChar(255)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  updateAt    DateTime? @db.Timestamp(0)
+  hotelId     Int?
+
+  hotel Hoteles? @relation(fields: [hotelId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_e6b0d8526441eedbed48b1344ec")
+
+  @@index([hotelId], map: "FK_e6b0d8526441eedbed48b1344ec")
+  @@map("imagenes_hoteles")
+}
+
+model HotelesCategorias {
+  hotelesId    Int
+  categoriasId Int
+
+  hotel     Hoteles    @relation(fields: [hotelesId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_f12ca8b71b70c8e7229a03cabe4")
+  categoria Categorias @relation(fields: [categoriasId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_2a09a2fdedd122a7cb936916b8b")
+
+  @@id([hotelesId, categoriasId])
+  @@index([hotelesId], map: "IDX_f12ca8b71b70c8e7229a03cabe")
+  @@index([categoriasId], map: "IDX_2a09a2fdedd122a7cb936916b8")
+  @@map("hoteles_categorias_categorias")
+}
+
+model HotelesContactos {
+  hotelesId   Int
+  contactosId Int
+
+  hotel    Hoteles   @relation(fields: [hotelesId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_d1b33fa3cf01e44b515707f24e9")
+  contacto Contactos @relation(fields: [contactosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_a42447069818c50ba8a47461da7")
+
+  @@id([hotelesId, contactosId])
+  @@index([hotelesId], map: "IDX_d1b33fa3cf01e44b515707f24e")
+  @@index([contactosId], map: "IDX_a42447069818c50ba8a47461da")
+  @@map("hoteles_contactos_contactos")
+}
+
+// ------------------------------------------------------------
+//  Restaurantes
+// ------------------------------------------------------------
+
+model Restaurantes {
+  id          Int       @id @default(autoincrement())
+  nombre      String    @db.Text
+  state       String    @default("Active") @db.VarChar(255)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  updateAt    DateTime? @db.Timestamp(0)
+  ubicacionId Int?
+
+  declaracionTuristica   Boolean @default(false) @db.TinyInt
+  descripcion            String  @db.Text
+  descripcionIngles      String  @db.Text
+  permitenMascotas       Boolean @default(false) @db.TinyInt
+  permitenNinos          Boolean @default(false) @db.TinyInt
+  discapacidadVisual     Boolean @default(false) @db.TinyInt
+  discapacidadAuditiva   Boolean @default(false) @db.TinyInt
+  discapacidadFisica     Boolean @default(false) @db.TinyInt
+  discapacidadCognitiva  Boolean @default(false) @db.TinyInt
+  discapacidadSicosocial Boolean @default(false) @db.TinyInt
+
+  permitenMascotasDescripcion             String? @db.Text
+  permitenMascotasDescripcionIngles       String? @db.Text
+  permitenNinosDescripcion                String? @db.Text
+  permitenNinosDescripcionIngles          String? @db.Text
+  discapacidadVisualDescripcion           String? @db.Text
+  discapacidadVisualDescripcionIngles     String? @db.Text
+  discapacidadAuditivaDescripcion         String? @db.Text
+  discapacidadAuditivaDescripcionIngles   String? @db.Text
+  discapacidadFisicaDescripcion           String? @db.Text
+  discapacidadFisicaDescripcionIngles     String? @db.Text
+  discapacidadCognitivaDescripcion        String? @db.Text
+  discapacidadCognitivaDescripcionIngles  String? @db.Text
+  discapacidadSicosocialDescripcion       String? @db.Text
+  discapacidadSicosocialDescripcionIngles String? @db.Text
+
+  ubicacion Ubicaciones? @relation(fields: [ubicacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_8b87c9e6ac61922720c1c372965")
+
+  imagenes  ImagenesRestaurantes[]
+  contactos RestaurantesContactos[]
+  eventos   EventosRestaurantes[]
+
+  @@index([ubicacionId], map: "FK_8b87c9e6ac61922720c1c372965")
+  @@map("restaurantes")
+}
+
+model ImagenesRestaurantes {
+  id            Int       @id @default(autoincrement())
+  nombre        String    @db.Text
+  descripcion   String?   @db.Text
+  url           String    @db.Text
+  nameUrl       String    @db.Text
+  state         String    @default("Active") @db.VarChar(255)
+  createdAt     DateTime  @default(now()) @db.Timestamp(6)
+  updateAt      DateTime? @db.Timestamp(0)
+  restauranteId Int?
+
+  restaurante Restaurantes? @relation(fields: [restauranteId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_a161e4d5c01b97fa8ff0b9b9349")
+
+  @@index([restauranteId], map: "FK_a161e4d5c01b97fa8ff0b9b9349")
+  @@map("imagenes_restaurantes")
+}
+
+model RestaurantesContactos {
+  restaurantesId Int
+  contactosId    Int
+
+  restaurante Restaurantes @relation(fields: [restaurantesId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_3a540c48e528af870b4aa8b4a8d")
+  contacto    Contactos    @relation(fields: [contactosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_cf442cab6d9957791812dc9350c")
+
+  @@id([restaurantesId, contactosId])
+  @@index([restaurantesId], map: "IDX_3a540c48e528af870b4aa8b4a8")
+  @@index([contactosId], map: "IDX_cf442cab6d9957791812dc9350")
+  @@map("restaurantes_contactos_contactos")
+}
+
+// ------------------------------------------------------------
+//  Oficinas turísticas
+// ------------------------------------------------------------
+
+model OficinasTuristicas {
+  id              Int       @id @default(autoincrement())
+  nombre          String    @db.Text
+  nombreEncargado String    @db.Text
+  descripcion     String    @db.Text
+  state           String    @default("Active") @db.VarChar(255)
+  createdAt       DateTime  @default(now()) @db.Timestamp(6)
+  updateAt        DateTime? @db.Timestamp(0)
+  ubicacionId     Int?
+
+  declaracionTuristica   Boolean @default(false) @db.TinyInt
+  descripcionIngles      String  @db.Text
+  discapacidadVisual     Boolean @default(false) @db.TinyInt
+  discapacidadAuditiva   Boolean @default(false) @db.TinyInt
+  discapacidadFisica     Boolean @default(false) @db.TinyInt
+  discapacidadCognitiva  Boolean @default(false) @db.TinyInt
+  discapacidadSicosocial Boolean @default(false) @db.TinyInt
+
+  discapacidadVisualDescripcion           String? @db.Text
+  discapacidadVisualDescripcionIngles     String? @db.Text
+  discapacidadAuditivaDescripcion         String? @db.Text
+  discapacidadAuditivaDescripcionIngles   String? @db.Text
+  discapacidadFisicaDescripcion           String? @db.Text
+  discapacidadFisicaDescripcionIngles     String? @db.Text
+  discapacidadCognitivaDescripcion        String? @db.Text
+  discapacidadCognitivaDescripcionIngles  String? @db.Text
+  discapacidadSicosocialDescripcion       String? @db.Text
+  discapacidadSicosocialDescripcionIngles String? @db.Text
+
+  ubicacion Ubicaciones? @relation(fields: [ubicacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_9005a5700caf9e762401e65bc4b")
+
+  imagenes  ImagenesOficinasTuristicas[]
+  contactos OficinasTuristicasContactos[]
+  eventos   EventosOficinas[]
+
+  @@index([ubicacionId], map: "FK_9005a5700caf9e762401e65bc4b")
+  @@map("oficinas_turisticas")
+}
+
+model ImagenesOficinasTuristicas {
+  id                 Int       @id @default(autoincrement())
+  nombre             String    @db.Text
+  descripcion        String?   @db.Text
+  url                String    @db.Text
+  nameUrl            String    @db.Text
+  state              String    @default("Active") @db.VarChar(255)
+  createdAt          DateTime  @default(now()) @db.Timestamp(6)
+  updateAt           DateTime? @db.Timestamp(0)
+  oficinaTuristicaId Int?
+
+  oficina OficinasTuristicas? @relation(fields: [oficinaTuristicaId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_f77b7cd43e05b9cd539d1985909")
+
+  @@index([oficinaTuristicaId], map: "FK_f77b7cd43e05b9cd539d1985909")
+  @@map("imagenes_oficinas_turisticas")
+}
+
+model OficinasTuristicasContactos {
+  oficinasTuristicasId Int
+  contactosId          Int
+
+  oficina  OficinasTuristicas @relation(fields: [oficinasTuristicasId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_42f2c3be59b324bdd019ab14fcc")
+  contacto Contactos          @relation(fields: [contactosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_e04ff379e1d18820b29102ab4e8")
+
+  @@id([oficinasTuristicasId, contactosId])
+  @@index([oficinasTuristicasId], map: "IDX_42f2c3be59b324bdd019ab14fc")
+  @@index([contactosId], map: "IDX_e04ff379e1d18820b29102ab4e")
+  @@map("oficinas_turisticas_contactos_contactos")
+}
+
+// ------------------------------------------------------------
+//  Operadores turísticos
+// ------------------------------------------------------------
+
+model OperadoresTuristicos {
+  id          Int       @id @default(autoincrement())
+  nombre      String    @db.Text
+  descripcion String    @db.Text
+  state       String    @default("Active") @db.VarChar(255)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  updateAt    DateTime? @db.Timestamp(0)
+  ubicacionId Int?
+
+  declaracionTuristica   Boolean @default(false) @db.TinyInt
+  descripcionIngles      String  @db.Text
+  discapacidadVisual     Boolean @default(false) @db.TinyInt
+  discapacidadAuditiva   Boolean @default(false) @db.TinyInt
+  discapacidadFisica     Boolean @default(false) @db.TinyInt
+  discapacidadCognitiva  Boolean @default(false) @db.TinyInt
+  discapacidadSicosocial Boolean @default(false) @db.TinyInt
+
+  discapacidadVisualDescripcion           String? @db.Text
+  discapacidadVisualDescripcionIngles     String? @db.Text
+  discapacidadAuditivaDescripcion         String? @db.Text
+  discapacidadAuditivaDescripcionIngles   String? @db.Text
+  discapacidadFisicaDescripcion           String? @db.Text
+  discapacidadFisicaDescripcionIngles     String? @db.Text
+  discapacidadCognitivaDescripcion        String? @db.Text
+  discapacidadCognitivaDescripcionIngles  String? @db.Text
+  discapacidadSicosocialDescripcion       String? @db.Text
+  discapacidadSicosocialDescripcionIngles String? @db.Text
+
+  ubicacion Ubicaciones? @relation(fields: [ubicacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_01037fa45d53750b6b88b3bab2e")
+
+  imagenes  ImagenesOperadoresTuristicos[]
+  contactos OperadoresTuristicosContactos[]
+  eventos   EventosOperadores[]
+
+  @@index([ubicacionId], map: "FK_01037fa45d53750b6b88b3bab2e")
+  @@map("operadores_turisticos")
+}
+
+model ImagenesOperadoresTuristicos {
+  id                  Int       @id @default(autoincrement())
+  nombre              String    @db.Text
+  descripcion         String?   @db.Text
+  url                 String    @db.Text
+  nameUrl             String    @db.Text
+  state               String    @default("Active") @db.VarChar(255)
+  createdAt           DateTime  @default(now()) @db.Timestamp(6)
+  updateAt            DateTime? @db.Timestamp(0)
+  operadorTuristicoId Int?
+
+  operador OperadoresTuristicos? @relation(fields: [operadorTuristicoId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_a495ebc0a9a02901df63bc5e491")
+
+  @@index([operadorTuristicoId], map: "FK_a495ebc0a9a02901df63bc5e491")
+  @@map("imagenes_operadores_turisticos")
+}
+
+model OperadoresTuristicosContactos {
+  operadoresTuristicosId Int
+  contactosId            Int
+
+  operador OperadoresTuristicos @relation(fields: [operadoresTuristicosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_8af59eba939cf043966cda6b401")
+  contacto Contactos            @relation(fields: [contactosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_55edcc8427b39b606d861aa0ab0")
+
+  @@id([operadoresTuristicosId, contactosId])
+  @@index([operadoresTuristicosId], map: "IDX_8af59eba939cf043966cda6b40")
+  @@index([contactosId], map: "IDX_55edcc8427b39b606d861aa0ab")
+  @@map("operadores_turisticos_contactos_contactos")
+}
+
+// ------------------------------------------------------------
+//  Rentadoras de vehículos
+// ------------------------------------------------------------
+
+model RentadorasVehiculos {
+  id          Int       @id @default(autoincrement())
+  nombre      String    @db.Text
+  descripcion String    @db.Text
+  state       String    @default("Active") @db.VarChar(255)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  updateAt    DateTime? @db.Timestamp(0)
+  ubicacionId Int?
+
+  descripcionIngles      String  @db.Text
+  discapacidadVisual     Boolean @default(false) @db.TinyInt
+  discapacidadAuditiva   Boolean @default(false) @db.TinyInt
+  discapacidadFisica     Boolean @default(false) @db.TinyInt
+  discapacidadCognitiva  Boolean @default(false) @db.TinyInt
+  discapacidadSicosocial Boolean @default(false) @db.TinyInt
+
+  discapacidadVisualDescripcion           String? @db.Text
+  discapacidadVisualDescripcionIngles     String? @db.Text
+  discapacidadAuditivaDescripcion         String? @db.Text
+  discapacidadAuditivaDescripcionIngles   String? @db.Text
+  discapacidadFisicaDescripcion           String? @db.Text
+  discapacidadFisicaDescripcionIngles     String? @db.Text
+  discapacidadCognitivaDescripcion        String? @db.Text
+  discapacidadCognitivaDescripcionIngles  String? @db.Text
+  discapacidadSicosocialDescripcion       String? @db.Text
+  discapacidadSicosocialDescripcionIngles String? @db.Text
+
+  ubicacion Ubicaciones? @relation(fields: [ubicacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_addce49626c69818e9698ec19a6")
+
+  imagenes  ImagenesRentadorasVehiculos[]
+  contactos RentadorasVehiculosContactos[]
+  eventos   EventosRentadoras[]
+
+  @@index([ubicacionId], map: "FK_addce49626c69818e9698ec19a6")
+  @@map("rentadoras_vehiculos")
+}
+
+model ImagenesRentadorasVehiculos {
+  id                   Int       @id @default(autoincrement())
+  nombre               String    @db.Text
+  descripcion          String?   @db.Text
+  url                  String    @db.Text
+  nameUrl              String    @db.Text
+  state                String    @default("Active") @db.VarChar(255)
+  createdAt            DateTime  @default(now()) @db.Timestamp(6)
+  updateAt             DateTime? @db.Timestamp(0)
+  rentadoraVehiculosId Int?
+
+  rentadora RentadorasVehiculos? @relation(fields: [rentadoraVehiculosId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_8b3b613e62349cf6da3dad04d9a")
+
+  @@index([rentadoraVehiculosId], map: "FK_8b3b613e62349cf6da3dad04d9a")
+  @@map("imagenes_rentadoras_vehiculos")
+}
+
+model RentadorasVehiculosContactos {
+  rentadorasVehiculosId Int
+  contactosId           Int
+
+  rentadora RentadorasVehiculos @relation(fields: [rentadorasVehiculosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_91315dfe359baa14665935565bc")
+  contacto  Contactos           @relation(fields: [contactosId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_0f811d2caaf375ed4d8fc25b6a7")
+
+  @@id([rentadorasVehiculosId, contactosId])
+  @@index([rentadorasVehiculosId], map: "IDX_91315dfe359baa14665935565b")
+  @@index([contactosId], map: "IDX_0f811d2caaf375ed4d8fc25b6a")
+  @@map("rentadoras_vehiculos_contactos_contactos")
+}
+
+// ------------------------------------------------------------
+//  Rutas turísticas (personalizadas por usuario)
+// ------------------------------------------------------------
+
+model RutasTuristicas {
+  id        Int       @id @default(autoincrement())
+  nombre    String    @db.Text
+  state     String    @default("Active") @db.VarChar(255)
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  updateAt  DateTime? @db.Timestamp(0)
+  usuarioId Int?
+
+  usuario Usuarios? @relation(fields: [usuarioId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "FK_db80f47a037a849dfb7b4d940ed")
+
+  atracciones RutasTuristicasAtracciones[]
+
+  @@index([usuarioId], map: "FK_db80f47a037a849dfb7b4d940ed")
+  @@map("rutas_turisticas")
+}
+
+model RutasTuristicasAtracciones {
+  rutasTuristicasId Int
+  atraccionesId     Int
+
+  ruta      RutasTuristicas @relation(fields: [rutasTuristicasId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_e8c5d41e5f3ae4b36417731e570")
+  atraccion Atracciones     @relation(fields: [atraccionesId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "FK_7959656f847a86fa9c075c5dc02")
+
+  @@id([rutasTuristicasId, atraccionesId])
+  @@index([rutasTuristicasId], map: "IDX_e8c5d41e5f3ae4b36417731e57")
+  @@index([atraccionesId], map: "IDX_7959656f847a86fa9c075c5dc0")
+  @@map("rutas_turisticas_atracciones_atracciones")
+}
