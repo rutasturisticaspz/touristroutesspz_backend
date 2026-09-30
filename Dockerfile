@@ -50,9 +50,13 @@ COPY --from=build /app/dist ./dist
 # aquí para que el contenedor arranque aunque no se monte nada.
 RUN mkdir -p /app/uploads && chown -R node:node /app/uploads
 
-# No correr como root.
-USER node
+# El proceso NO corre como root: entrypoint.sh arranca como root sólo
+# para ajustar el dueño del volumen de imágenes (que se monta encima de
+# /app/uploads y tapa el chown de arriba) y después baja a `node`.
+COPY entrypoint.sh /usr/local/bin/entrypoint-rutas.sh
+RUN chmod +x /usr/local/bin/entrypoint-rutas.sh
 
 EXPOSE 2999
 
+ENTRYPOINT ["/usr/local/bin/entrypoint-rutas.sh"]
 CMD ["node", "dist/server.js"]
