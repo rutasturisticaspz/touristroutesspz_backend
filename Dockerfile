@@ -50,9 +50,10 @@ COPY --from=build /app/dist ./dist
 # aquí para que el contenedor arranque aunque no se monte nada.
 RUN mkdir -p /app/uploads && chown -R node:node /app/uploads
 
-# No correr como root.
-USER node
+COPY entrypoint.sh /usr/local/bin/entrypoint-rutas.sh
+RUN chmod +x /usr/local/bin/entrypoint-rutas.sh
 
 EXPOSE 2999
 
+ENTRYPOINT ["/usr/local/bin/entrypoint-rutas.sh"]
 CMD ["node", "dist/server.js"]
