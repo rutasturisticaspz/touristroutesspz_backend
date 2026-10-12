@@ -44,7 +44,7 @@ const esquemaCrear = z.object({
 const esquemaActualizar = esquemaCrear.partial();
 const esquemaIds = z.object({ ids: z.array(z.number().int().positive()) });
 
-// Convierte ubicacionId en la relación que espera Prisma.
+// Converts ubicacionId into the relation Prisma expects.
 function prepararDatos(datos: Record<string, unknown>) {
   const { ubicacionId, ...resto } = datos;
   return {
@@ -55,9 +55,9 @@ function prepararDatos(datos: Record<string, unknown>) {
   };
 }
 
-// ---------------- Lectura pública ----------------
+// ---------------- Public reads ----------------
 
-// Conteo global por tipo de sitio. Debe ir antes de /:id.
+// Global count by site type. Must come before /:id.
 atraccionesRouter.get(
   '/conteo',
   asyncHandler(async (_req, res) => {
@@ -65,7 +65,7 @@ atraccionesRouter.get(
   }),
 );
 
-// Sólo las que tienen imágenes.
+// Only those that have images.
 atraccionesRouter.get(
   '/con-imagenes',
   asyncHandler(async (req, res) => {
@@ -73,8 +73,8 @@ atraccionesRouter.get(
   }),
 );
 
-// Listado con todos los filtros combinables:
-//   ?filtro=texto
+// List with all combinable filters:
+//   ?filtro=text
 //   ?provincia=&canton=&distrito=
 //   ?categorias=Cataratas,Montaña
 //   ?accesibilidad=permitenNinos,discapacidadFisica
@@ -93,7 +93,7 @@ atraccionesRouter.get(
   }),
 );
 
-// Atracciones parecidas, para la barra lateral del detalle.
+// Similar attractions, for the detail sidebar.
 atraccionesRouter.get(
   '/:id/relacionados',
   asyncHandler(async (req, res) => {
@@ -102,7 +102,7 @@ atraccionesRouter.get(
   }),
 );
 
-// ---------------- Escritura ----------------
+// ---------------- Writes ----------------
 
 atraccionesRouter.post(
   '/',

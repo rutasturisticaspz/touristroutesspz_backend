@@ -1,7 +1,7 @@
 import { prisma } from '../../db/prisma';
 import { ACCESIBILIDAD_COMPLETA, crearServicioSitio } from '../../lib/sitios';
 
-// Restaurantes. Sin categorías propias en el modelo original.
+// Restaurants. No categories of their own in the original model.
 export const restaurantesService = crearServicioSitio({
   delegado: prisma.restaurantes,
   etiqueta: 'Restaurante',

@@ -1,4 +1,5 @@
-// Error con código HTTP, para que el manejador central sepa qué responder.
+// Error with an HTTP status code, so the central handler knows what to
+// respond with.
 export class HttpError extends Error {
   constructor(
     public readonly status: number,

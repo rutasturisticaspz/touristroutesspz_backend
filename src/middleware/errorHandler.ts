@@ -4,7 +4,7 @@ import { MulterError } from 'multer';
 import { HttpError } from '../lib/errors';
 import { config } from '../config';
 
-// Manejador central de errores. Debe registrarse de último.
+// Central error handler. It must be registered last.
 export function errorHandler(
   err: unknown,
   _req: Request,
@@ -16,8 +16,8 @@ export function errorHandler(
     return;
   }
 
-  // Errores de subida de archivos: son culpa de la petición, no del
-  // servidor, así que responden 400 y no 500.
+  // File upload errors: they are the request's fault, not the server's,
+  // so they respond 400 and not 500.
   if (err instanceof MulterError) {
     const mensaje =
       err.code === 'LIMIT_FILE_SIZE'

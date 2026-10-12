@@ -32,8 +32,8 @@ calificacionesRouter.get(
   }),
 );
 
-// Escribir una calificación sólo requiere sesión iniciada, no rol de
-// panel: la idea es que la escriba el visitante, no el administrador.
+// Writing a rating only requires a signed-in session, not a panel
+// role: the idea is that the visitor writes it, not the administrator.
 
 calificacionesRouter.post(
   '/',

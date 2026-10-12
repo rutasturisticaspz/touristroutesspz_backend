@@ -2,19 +2,20 @@ import { prisma } from '../../db/prisma';
 import { noEncontrado, solicitudInvalida } from '../../lib/errors';
 import { EstadoEntidad } from '../../types/roles';
 import { combinarWhere, leerOrden, leerPaginacion } from '../../lib/query';
+import { hoyDelServidor } from '../../lib/fechas';
 
-// Eventos.
-// No usa la fábrica de sitios porque tiene forma propia: no tiene
-// accesibilidad, sí tiene nombre en inglés y fechas, y además se puede
-// asociar a cualquiera de los otros seis tipos de sitio.
-// Sobre las fechas: la tabla guarda cuatro. fechaInicio/fechaFin son
-// cuándo ocurre el evento; mostrarFechaInicio/mostrarFechaFin son
-// cuándo debe aparecer publicado en el sitio. El sistema anterior las
-// mezclaba; aquí se respetan como dos cosas distintas.
+// Events.
+// It does not use the site factory because it has its own shape: it
+// has no accessibility, it does have an English name and dates, and it
+// can also be associated with any of the other six site types.
+// About the dates: the table stores four. fechaInicio/fechaFin are
+// when the event takes place; mostrarFechaInicio/mostrarFechaFin are
+// when it should appear published on the site. The previous system
+// mixed them up; here they are respected as two separate things.
 
 const CAMPOS_ORDENABLES = ['id', 'nombre', 'fechaInicio', 'createdAt'] as const;
 
-// Los seis tipos de sitio a los que se puede vincular un evento.
+// The six site types an event can be linked to.
 const VINCULOS = {
   atracciones: { delegado: prisma.eventosAtracciones, campo: 'atraccionesId', relacion: 'atraccion' },
   hoteles: { delegado: prisma.eventosHoteles, campo: 'hotelesId', relacion: 'hotel' },
@@ -40,7 +41,7 @@ const RELACIONES = {
   rentadorasVehiculos: { include: { rentadora: true } },
 };
 
-// Aplana todas las tablas intermedias.
+// Flattens all the join tables.
 function darFormato(evento: any) {
   if (!evento) return evento;
   const salida: any = { ...evento };
@@ -85,8 +86,8 @@ function filtroUbicacion(u: { provincia?: string; canton?: string; distrito?: st
   return { ubicacion: cond };
 }
 
-// ?vigentes=true deja sólo los eventos que hoy deben estar publicados,
-// según la ventana mostrarFechaInicio–mostrarFechaFin.
+// ?vigentes=true keeps only the events that should be published today,
+// according to the mostrarFechaInicio–mostrarFechaFin window.
 function filtroVigentes(valor: unknown) {
   if (valor !== 'true' && valor !== true) return undefined;
   const ahora = new Date();
@@ -96,6 +97,20 @@ function filtroVigentes(valor: unknown) {
       { OR: [{ mostrarFechaFin: null }, { mostrarFechaFin: { gte: ahora } }] },
     ],
   };
+}
+
+// Events that have not ended yet: today's and future ones.
+// fechaFin alone is not enough, because the column is filled with the
+// creation date when nobody edits it, so fechaInicio is checked too.
+export function filtroEventosProximos() {
+  const hoy = hoyDelServidor();
+  return { OR: [{ fechaFin: { gte: hoy } }, { fechaInicio: { gte: hoy } }] };
+}
+
+// ?proximos=true
+function filtroProximos(valor: unknown) {
+  if (valor !== 'true' && valor !== true) return undefined;
+  return filtroEventosProximos();
 }
 
 export const eventosService = {
@@ -112,6 +127,7 @@ export const eventosService = {
         distrito: query.distrito as string | undefined,
       }),
       filtroVigentes(query.vigentes),
+      filtroProximos(query.proximos),
     );
 
     const [datos, total] = await Promise.all([
@@ -179,9 +195,9 @@ export const eventosService = {
     return eventosService.obtenerPorId(id);
   },
 
-  // Reemplaza los sitios vinculados de un tipo. El tipo se valida
-  // contra la lista de arriba, nunca se usa lo que venga en la
-  // petición para armar el nombre de una tabla.
+  // Replaces the linked sites of one type. The type is validated
+  // against the list above; whatever comes in the request is never used
+  // to build a table name.
   async definirVinculos(id: number, tipo: string, ids: number[]) {
     if (!TIPOS_VINCULO.includes(tipo as TipoVinculo)) {
       throw solicitudInvalida(

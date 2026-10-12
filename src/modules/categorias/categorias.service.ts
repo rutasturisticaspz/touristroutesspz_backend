@@ -50,7 +50,7 @@ export const categoriasService = {
     });
   },
 
-  // Baja lógica, igual que en el sistema original.
+  // Soft delete, same as in the original system.
   async desactivar(id: number) {
     await this.obtenerPorId(id);
     return prisma.categorias.update({

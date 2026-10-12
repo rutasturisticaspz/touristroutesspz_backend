@@ -2,11 +2,11 @@ import { config } from './config';
 import { crearApp } from './app';
 import { conectarBaseDeDatos, desconectarBaseDeDatos } from './db/prisma';
 
-// Punto de entrada.
-// A diferencia de la versión anterior, el servidor NO empieza a
-// escuchar hasta que la base de datos responde. Antes se anunciaba
-// "listening" y después fallaba la conexión, dejando el proceso
-// aceptando peticiones que no podía atender.
+// Entry point.
+// Unlike the previous version, the server does NOT start listening
+// until the database responds. Before, "listening" was announced and
+// then the connection failed, leaving the process accepting requests
+// it could not serve.
 async function iniciar(): Promise<void> {
   try {
     await conectarBaseDeDatos();

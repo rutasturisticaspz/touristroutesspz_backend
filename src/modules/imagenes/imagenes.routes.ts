@@ -17,7 +17,7 @@ import {
 
 export const imagenesRouter = Router();
 
-// El directorio tiene que existir antes de que multer intente escribir.
+// The directory has to exist before multer tries to write.
 fs.mkdirSync(config.uploads.directorio, { recursive: true });
 
 const almacenamiento = multer.diskStorage({
@@ -47,9 +47,9 @@ const esquemaTexto = z.object({
   descripcion: z.string().nullable().optional(),
 });
 
-// ---------------- Lectura pública ----------------
+// ---------------- Public reads ----------------
 
-// Los tipos de imagen que acepta el sistema. Debe ir antes de /:tipo.
+// The image types the system accepts. Must come before /:tipo.
 imagenesRouter.get('/tipos', (_req, res) => {
   res.json(TIPOS_IMAGEN);
 });
@@ -71,13 +71,13 @@ imagenesRouter.get(
   }),
 );
 
-// ---------------- Escritura ----------------
+// ---------------- Writes ----------------
 
 // POST /api/imagenes/atracciones/21
-// multipart/form-data con el campo "archivo", más "nombre" y
-// "descripcion" opcionales.
-// Reemplaza la subida a Firebase que hacía el panel: el archivo queda
-// en el disco del servidor y la base guarda una ruta relativa.
+// multipart/form-data with the "archivo" field, plus optional "nombre"
+// and "descripcion".
+// Replaces the Firebase upload the panel used to do: the file stays on
+// the server's disk and the database stores a relative path.
 imagenesRouter.post(
   '/:tipo/:idDueno',
   requiereEdicion,

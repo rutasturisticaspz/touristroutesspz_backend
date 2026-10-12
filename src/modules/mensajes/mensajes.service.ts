@@ -34,7 +34,7 @@ export const mensajesService = {
     return m;
   },
 
-  // Envío desde el formulario público de contacto.
+  // Submission from the public contact form.
   async crear(datos: DatosMensaje) {
     return prisma.mensajesContactenos.create({
       data: { ...datos, estado: 'PENDIENTE', state: EstadoEntidad.ACTIVO },
@@ -57,11 +57,10 @@ export const mensajesService = {
     });
   },
 
-  // Responde de verdad desde el backend (ver src/lib/mailer.ts), en
-  // vez de abrir un mailto: en el navegador de quien esta en el
-  // panel. Al enviarse bien, el mensaje queda marcado como atendido
-  // automaticamente -- no hace falta el paso aparte de "Marcar como
-  // atendido".
+  // Actually replies from the backend (see src/lib/mailer.ts), instead
+  // of opening a mailto: in the browser of whoever is in the panel.
+  // When it is sent successfully, the message is automatically marked
+  // as handled -- the separate "Mark as handled" step is not needed.
   async responder(id: number, cuerpo: string) {
     const mensaje = await this.obtenerPorId(id);
 

@@ -4,16 +4,17 @@ import { noEncontrado } from '../../lib/errors';
 import { EstadoEntidad } from '../../types/roles';
 import { combinarWhere, leerOrden, leerPaginacion } from '../../lib/query';
 import { barajar } from '../../lib/sitios';
+import { listarConImagenes } from '../../lib/nuevosPrimero';
 
-// Atracciones turísticas.
-// Este era el servicio más grande del sistema anterior: 24 KB con 88
-// lugares donde el texto de la petición se pegaba directamente a la
-// consulta SQL. Aquí todas esas búsquedas se expresan con el API de
-// Prisma, que parametriza los valores por su cuenta.
+// Tourist attractions.
+// This was the largest service in the previous system: 24 KB with 88
+// places where the request text was pasted directly into the SQL
+// query. Here all those searches are expressed with the Prisma API,
+// which parameterizes the values on its own.
 
 const CAMPOS_ORDENABLES = ['id', 'nombre', 'createdAt'] as const;
 
-// Relaciones que se traen al consultar una atracción.
+// Relations that are loaded when querying an attraction.
 const RELACIONES = {
   ubicacion: true,
   imagenes: { where: { state: EstadoEntidad.ACTIVO } },
@@ -21,7 +22,7 @@ const RELACIONES = {
   contactos: { include: { contacto: true } },
 } satisfies Prisma.AtraccionesInclude;
 
-// Aplana las tablas intermedias para que el frontend reciba algo simple.
+// Flattens the join tables so the frontend receives something simple.
 function darFormato(atraccion: any) {
   if (!atraccion) return atraccion;
   const { categorias, contactos, ...resto } = atraccion;
@@ -32,7 +33,7 @@ function darFormato(atraccion: any) {
   };
 }
 
-// Búsqueda de texto sobre la atracción y sus relaciones.
+// Text search over the attraction and its relations.
 function busquedaTexto(termino?: string): Prisma.AtraccionesWhereInput | undefined {
   const t = termino?.trim();
   if (!t) return undefined;
@@ -59,7 +60,7 @@ function busquedaTexto(termino?: string): Prisma.AtraccionesWhereInput | undefin
   };
 }
 
-// Filtro por ubicación. Sólo se aplican las partes que vengan.
+// Location filter. Only the parts that are provided are applied.
 function filtroUbicacion(u?: {
   provincia?: string;
   canton?: string;
@@ -74,15 +75,15 @@ function filtroUbicacion(u?: {
   return { ubicacion: cond };
 }
 
-// Filtro por categorías, recibidas por nombre.
+// Category filter, received by name.
 function filtroCategorias(nombres?: string[]): Prisma.AtraccionesWhereInput | undefined {
   const limpios = (nombres ?? []).map((n) => n.trim()).filter(Boolean);
   if (limpios.length === 0) return undefined;
   return { categorias: { some: { categoria: { nombre: { in: limpios } } } } };
 }
 
-// Filtro por características de accesibilidad.
-// Recibe los nombres de las columnas booleanas que deben estar en true.
+// Filter by accessibility features.
+// Receives the names of the boolean columns that must be true.
 const ACCESIBILIDAD_PERMITIDA = [
   'permitenMascotas',
   'permitenNinos',
@@ -138,30 +139,19 @@ export const atraccionesService = {
     return darFormato(atraccion);
   },
 
-  // Sólo las que tienen al menos una imagen. Usado por la portada.
-  async conImagenes(query: Record<string, unknown>) {
-    const { skip, take } = leerPaginacion(query);
-    const where: Prisma.AtraccionesWhereInput = {
-      state: EstadoEntidad.ACTIVO,
-      imagenes: { some: { state: EstadoEntidad.ACTIVO } },
-    };
-
-    const [datos, total] = await Promise.all([
-      prisma.atracciones.findMany({
-        where,
-        orderBy: { nombre: 'asc' },
-        skip,
-        take,
-        include: RELACIONES,
-      }),
-      prisma.atracciones.count({ where }),
-    ]);
-
-    return { total, datos: datos.map(darFormato) };
+  // Only those with at least one image. Used by the home page. With
+  // ?nuevos=<days> the recently created ones come first.
+  conImagenes(query: Record<string, unknown>) {
+    return listarConImagenes({
+      delegado: prisma.atracciones,
+      include: RELACIONES,
+      darFormato,
+      query,
+    });
   },
 
-  // Conteo global por tipo de sitio, para el panel.
-  // Equivale al antiguo countOfAll.
+  // Global count by site type, for the panel.
+  // Equivalent to the old countOfAll.
   async conteoGlobal() {
     const activo = { state: EstadoEntidad.ACTIVO };
     const [atracciones, restaurantes, hoteles, oficinas, operadores, rentadoras, eventos] =
@@ -196,7 +186,7 @@ export const atraccionesService = {
     return darFormato(actualizada);
   },
 
-  // Reemplaza por completo las categorías asociadas.
+  // Completely replaces the associated categories.
   async definirCategorias(id: number, categoriaIds: number[]) {
     await this.obtenerPorId(id);
     await prisma.$transaction([
@@ -209,7 +199,7 @@ export const atraccionesService = {
     return this.obtenerPorId(id);
   },
 
-  // Reemplaza por completo los contactos asociados.
+  // Completely replaces the associated contacts.
   async definirContactos(id: number, contactoIds: number[]) {
     await this.obtenerPorId(id);
     await prisma.$transaction([
@@ -222,12 +212,12 @@ export const atraccionesService = {
     return this.obtenerPorId(id);
   },
 
-  // Atracciones relacionadas con esta, para la barra lateral de la
-  // página de detalle. Reemplaza a findBySameCategory.
-  // El viejo excluía la actual comparando nombres pegados al SQL y
-  // filtraba sólo por `categoria.nombreIngles`; como muchas categorías
-  // tienen ese campo vacío, ahí se perdían coincidencias. Aquí se
-  // excluye por id y se comparan los dos idiomas.
+  // Attractions related to this one, for the sidebar of the detail
+  // page. Replaces findBySameCategory.
+  // The old one excluded the current one by comparing names pasted into
+  // the SQL and filtered only by `categoria.nombreIngles`; since many
+  // categories have that field empty, matches were lost there. Here it
+  // is excluded by id and both languages are compared.
   async relacionados(id: number, take = 3) {
     const actual: any = await atraccionesService.obtenerPorId(id);
 
@@ -263,7 +253,7 @@ export const atraccionesService = {
     return { total: candidatos.length, datos: datos.map(darFormato) };
   },
 
-  // Quita un solo contacto, sin tocar los demás.
+  // Removes a single contact, without touching the others.
   async quitarContacto(id: number, contactoId: number) {
     await atraccionesService.obtenerPorId(id);
     await prisma.atraccionesContactos.deleteMany({
@@ -281,7 +271,7 @@ export const atraccionesService = {
   },
 };
 
-// Acepta ?x=a&x=b y también ?x=a,b
+// Accepts ?x=a&x=b as well as ?x=a,b
 function normalizarLista(valor: unknown): string[] | undefined {
   if (valor === undefined || valor === null) return undefined;
   if (Array.isArray(valor)) return valor.map(String);

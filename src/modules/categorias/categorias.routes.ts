@@ -22,7 +22,7 @@ function validar<T>(esquema: z.ZodSchema<T>, datos: unknown): T {
   return r.data;
 }
 
-// --- Lectura pública ---
+// --- Public reads ---
 categoriasRouter.get(
   '/',
   asyncHandler(async (req, res) => {
@@ -37,7 +37,7 @@ categoriasRouter.get(
   }),
 );
 
-// --- Escritura: requiere sesión con permiso de edición ---
+// --- Writes: require a session with edit permission ---
 categoriasRouter.post(
   '/',
   requiereEdicion,

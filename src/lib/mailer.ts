@@ -2,19 +2,19 @@ import nodemailer, { type Transporter } from 'nodemailer';
 import { config } from '../config';
 import { HttpError } from './errors';
 
-// Envío real de correo, desde el backend.
+// Real email sending, from the backend.
 //
-// Antes esto se resolvia con un mailto: en el navegador del
-// administrador -- el correo salia de la cuenta que esa persona
-// tuviera abierta en su computadora, no necesariamente la
-// institucional. Aqui el backend manda el correo el mismo, con las
-// credenciales SMTP que se configuren en el .env, asi que siempre
-// sale de la misma cuenta sin importar quien este en el panel.
+// This used to be handled with a mailto: in the administrator's
+// browser -- the email went out from whatever account that person had
+// open on their computer, not necessarily the institutional one. Here
+// the backend sends the email itself, with the SMTP credentials set in
+// .env, so it always goes out from the same account no matter who is
+// in the panel.
 //
-// La configuracion es opcional a proposito: si todavia no hay una
-// cuenta SMTP institucional, el resto del sistema sigue funcionando
-// igual (el admin puede ver y marcar mensajes), y solo falla, con un
-// mensaje claro, si alguien intenta usar "Responder por correo".
+// The configuration is optional on purpose: if there is no
+// institutional SMTP account yet, the rest of the system keeps working
+// as usual (the admin can view and mark messages), and it only fails,
+// with a clear message, if someone tries to use "Reply by email".
 
 let transportador: Transporter | null = null;
 let avisoConfiguracion: string | null = null;
@@ -33,7 +33,7 @@ function construirTransportador(): Transporter | null {
   return nodemailer.createTransport({
     host,
     port: puerto,
-    // 465 usa TLS desde el inicio; 587/25 usan STARTTLS.
+    // 465 uses TLS from the start; 587/25 use STARTTLS.
     secure: puerto === 465,
     auth: { user: usuario, pass: password },
   });
@@ -53,10 +53,9 @@ export interface CorreoSaliente {
   para: string;
   asunto: string;
   texto: string;
-  // Para que las respuestas del destinatario lleguen a la bandeja
-  // correcta cuando SMTP_FROM es una cuenta distinta a la que
-  // realmente atiende los mensajes (por ejemplo, una cuenta de envio
-  // generica de la Universidad).
+  // So the recipient's replies reach the right inbox when SMTP_FROM is a
+  // different account from the one that actually handles the messages
+  // (for example, a generic sending account of the University).
   responderA?: string;
 }
 
@@ -71,8 +70,8 @@ export async function enviarCorreo(datos: CorreoSaliente): Promise<void> {
       replyTo: datos.responderA,
     });
   } catch (error) {
-    // No se filtra el error original al usuario (puede traer detalles
-    // de la cuenta SMTP); queda en el log del servidor para revisar.
+    // The original error is not leaked to the user (it may carry details
+    // of the SMTP account); it stays in the server log for review.
     console.error('Fallo el envio de correo:', error);
     throw new HttpError(502, 'No se pudo enviar el correo. Intente de nuevo mas tarde.');
   }
