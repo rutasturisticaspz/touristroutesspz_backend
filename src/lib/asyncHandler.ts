@@ -1,7 +1,7 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 
-// Envuelve un handler asíncrono para que cualquier promesa rechazada
-// llegue al manejador de errores de Express en vez de quedar colgada.
+// Wraps an async handler so any rejected promise reaches Express's
+// error handler instead of being left hanging.
 export function asyncHandler(
   fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown>,
 ): RequestHandler {

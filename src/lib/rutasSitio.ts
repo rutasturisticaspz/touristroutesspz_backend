@@ -6,28 +6,28 @@ import { leerId } from './query';
 import { requiereEdicion } from '../middleware/auth';
 import type { ServicioSitio } from './sitios';
 
-// Fábrica de routers para los sitios.
-// Todos exponen la misma superficie:
-//   GET    /                 listado con filtros
-//   GET    /con-imagenes     sólo los que tienen galería
-//   GET    /:id              detalle
-//   GET    /:id/relacionados  otros sitios parecidos (barra lateral)
-//   POST   /                 crear            (requiere sesión)
-//   PUT    /:id              actualizar       (requiere sesión)
-//   PUT    /:id/contactos    definir contactos (requiere sesión)
-//   DELETE /:id/contactos/:contactoId  quitar uno solo (requiere sesión)
-//   PUT    /:id/categorias   definir categorías (si el sitio las tiene)
-//   DELETE /:id              baja lógica      (requiere sesión)
-// Las lecturas son públicas; toda escritura pasa por requiereEdicion.
-// En el sistema anterior 91 de 93 endpoints de escritura estaban
-// abiertos sin autenticación: aquí el permiso se declara por ruta y
-// lo cerrado es lo predeterminado.
+// Router factory for the sites.
+// They all expose the same surface:
+//   GET    /                 list with filters
+//   GET    /con-imagenes     only those that have a gallery
+//   GET    /:id              detail
+//   GET    /:id/relacionados  other similar sites (sidebar)
+//   POST   /                 create            (requires session)
+//   PUT    /:id              update            (requires session)
+//   PUT    /:id/contactos    set contacts      (requires session)
+//   DELETE /:id/contactos/:contactoId  remove just one (requires session)
+//   PUT    /:id/categorias   set categories (if the site has them)
+//   DELETE /:id              soft delete       (requires session)
+// Reads are public; every write goes through requiereEdicion.
+// In the previous system 91 of 93 write endpoints were open without
+// authentication: here permission is declared per route and closed is
+// the default.
 
 const SIN_DESCRIPCION = new Set(['declaracionTuristica']);
 
-// Arma el bloque zod de accesibilidad a partir de las columnas que
-// realmente existen en esa tabla. Cada bandera booleana trae su par de
-// descripciones en español e inglés, salvo declaracionTuristica.
+// Builds the zod accessibility block from the columns that actually
+// exist in that table. Each boolean flag comes with its pair of
+// descriptions in Spanish and English, except declaracionTuristica.
 export function esquemaAccesibilidad(campos: readonly string[]) {
   const forma: Record<string, z.ZodTypeAny> = {};
   for (const campo of campos) {
@@ -41,7 +41,7 @@ export function esquemaAccesibilidad(campos: readonly string[]) {
 
 const esquemaIds = z.object({ ids: z.array(z.number().int().positive()) });
 
-// Convierte ubicacionId en la relación anidada que espera Prisma.
+// Converts ubicacionId into the nested relation Prisma expects.
 export function prepararDatos(datos: Record<string, unknown>) {
   const { ubicacionId, ...resto } = datos;
   return {
@@ -54,11 +54,11 @@ export function prepararDatos(datos: Record<string, unknown>) {
 
 export interface OpcionesRouterSitio {
   servicio: ServicioSitio;
-  // Campos propios del sitio, sin los de accesibilidad.
+  // The site's own fields, without the accessibility ones.
   esquemaBase: z.ZodRawShape;
-  // true si la tabla tiene tabla intermedia de categorías.
+  // true if the table has a categories join table.
   tieneCategorias?: boolean;
-  // true si la tabla tiene tabla intermedia de contactos.
+  // true if the table has a contacts join table.
   tieneContactos?: boolean;
 }
 
@@ -74,7 +74,7 @@ export function crearRouterSitio(opciones: OpcionesRouterSitio): Router {
 
   const router = Router();
 
-  // ---------------- Lectura pública ----------------
+  // ---------------- Public reads ----------------
 
   router.get(
     '/con-imagenes',
@@ -97,8 +97,8 @@ export function crearRouterSitio(opciones: OpcionesRouterSitio): Router {
     }),
   );
 
-  // Sitios relacionados con este, para la barra lateral de la página
-  // de detalle. ?take=3 por omisión.
+  // Sites related to this one, for the sidebar of the detail page.
+  // ?take=3 by default.
   router.get(
     '/:id/relacionados',
     asyncHandler(async (req, res) => {
@@ -107,7 +107,7 @@ export function crearRouterSitio(opciones: OpcionesRouterSitio): Router {
     }),
   );
 
-  // ---------------- Escritura ----------------
+  // ---------------- Writes ----------------
 
   router.post(
     '/',

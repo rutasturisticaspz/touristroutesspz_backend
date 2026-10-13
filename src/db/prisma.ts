@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { config } from '../config';
 
-// Cliente único de Prisma. En desarrollo se reutiliza entre recargas
-// para no abrir una conexión nueva en cada cambio de archivo.
+// Single Prisma client. In development it is reused across reloads so
+// a new connection is not opened on every file change.
 
 const globalParaPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -11,10 +11,9 @@ const globalParaPrisma = globalThis as unknown as {
 export const prisma =
   globalParaPrisma.prisma ??
   new PrismaClient({
-    // La URL se le pasa explícitamente en vez de dejar que Prisma lea
-    // DATABASE_URL por su cuenta: así el backend usa exactamente las
-    // mismas credenciales que el contenedor de MySQL, armadas en un
-    // solo lugar.
+    // The URL is passed explicitly instead of letting Prisma read
+    // DATABASE_URL on its own: this way the backend uses exactly the same
+    // credentials as the MySQL container, built in a single place.
     datasourceUrl: config.databaseUrl,
     log: config.entorno === 'development' ? ['warn', 'error'] : ['error'],
   });

@@ -15,14 +15,14 @@ const esquemaCrear = z.object({
   mensaje: z.string().min(1),
 });
 
-// Envío público del formulario de contacto.
-// Es la única escritura abierta del sistema, y es intencional.
+// Public submission of the contact form.
+// It is the only open write in the system, and that is intentional.
 mensajesRouter.post('/', asyncHandler(async (req, res) => {
   await mensajesService.crear(validar(esquemaCrear, req.body));
   res.status(201).json({ ok: true, mensaje: 'Mensaje enviado' });
 }));
 
-// Leer y administrar mensajes sí requiere sesión.
+// Reading and managing messages does require a session.
 mensajesRouter.get('/', requiereEdicion, asyncHandler(async (req, res) => {
   res.json(await mensajesService.listar(req.query as Record<string, unknown>));
 }));
@@ -40,7 +40,7 @@ mensajesRouter.delete('/:id', requiereEdicion, asyncHandler(async (req, res) => 
   res.json(await mensajesService.desactivar(leerId(req.params.id)));
 }));
 
-// Responde de verdad por correo (SMTP), ver mensajesService.responder.
+// Actually replies by email (SMTP), see mensajesService.responder.
 mensajesRouter.post('/:id/responder', requiereEdicion, asyncHandler(async (req, res) => {
   const { cuerpo } = validar(z.object({ cuerpo: z.string().min(1) }), req.body);
   res.json(await mensajesService.responder(leerId(req.params.id), cuerpo));

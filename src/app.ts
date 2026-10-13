@@ -18,6 +18,8 @@ import { eventosRouter } from './modules/eventos/eventos.routes';
 import { imagenesRouter } from './modules/imagenes/imagenes.routes';
 import { calificacionesRouter } from './modules/calificaciones/calificaciones.routes';
 import { rutasRouter } from './modules/rutas/rutas.routes';
+import { mapasRouter } from './modules/mapas/mapas.routes';
+import { novedadesRouter } from './modules/novedades/novedades.routes';
 
 export function crearApp() {
   const app = express();
@@ -32,8 +34,8 @@ export function crearApp() {
   app.use(express.json({ limit: '1mb' }));
   app.use(express.urlencoded({ extended: true }));
 
-  // Imágenes servidas desde el disco local, sin depender de ningún
-  // servicio externo de almacenamiento.
+  // Images served from the local disk, without depending on any external
+  // storage service.
   app.use(
     config.uploads.rutaPublica,
     express.static(config.uploads.directorio, { fallthrough: true, maxAge: '1d' }),
@@ -58,6 +60,8 @@ export function crearApp() {
   app.use('/api/imagenes', imagenesRouter);
   app.use('/api/calificaciones', calificacionesRouter);
   app.use('/api/rutas-turisticas', rutasRouter);
+  app.use('/api/mapas', mapasRouter);
+  app.use('/api/novedades', novedadesRouter);
 
   app.use(noEncontradoHandler);
   app.use(errorHandler);

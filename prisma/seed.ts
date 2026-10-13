@@ -3,10 +3,10 @@ import { PrismaClient } from '@prisma/client';
 import 'dotenv/config';
 
 /**
- * Datos de prueba para desarrollo local.
+ * Test data for local development.
  *
- * Son datos inventados, no los reales del sitio. Sirven para tener algo
- * con qué probar los endpoints y para poder entrar al panel.
+ * It is made-up data, not the real site data. It gives you something
+ * to try the endpoints with and lets you sign in to the panel.
  *
  *     npm run db:seed
  */
@@ -19,7 +19,7 @@ const ADMIN_PASSWORD = 'Admin12345';
 async function main() {
   console.log('Cargando datos de prueba...\n');
 
-  // ---- Usuario administrador ----
+  // ---- Administrator user ----
   const hash = await bcrypt.hash(ADMIN_PASSWORD, 12);
   const existente = await prisma.usuarios.findFirst({ where: { email: ADMIN_EMAIL } });
 
@@ -42,7 +42,7 @@ async function main() {
     console.log('Administrador creado');
   }
 
-  // ---- Categorías ----
+  // ---- Categories ----
   const nombresCategorias = [
     { nombre: 'Cataratas', ingles: 'Waterfalls' },
     { nombre: 'Montaña', ingles: 'Mountain' },
@@ -68,7 +68,7 @@ async function main() {
   }
   console.log(`Categorías: ${categorias.length}`);
 
-  // ---- Ubicación ----
+  // ---- Location ----
   let ubicacion = await prisma.ubicaciones.findFirst({
     where: { distrito: 'San Isidro de El General' },
   });
@@ -85,13 +85,13 @@ async function main() {
   });
   console.log('Ubicación lista');
 
-  // ---- Contacto ----
+  // ---- Contact ----
   let contacto = await prisma.contactos.findFirst({ where: { valor: '2771-0000' } });
   contacto ??= await prisma.contactos.create({
     data: { valor: '2771-0000', tipo: 'telefono', state: 'Active' },
   });
 
-  // ---- Atracciones ----
+  // ---- Attractions ----
   const atracciones = [
     {
       nombre: 'Catarata de prueba',

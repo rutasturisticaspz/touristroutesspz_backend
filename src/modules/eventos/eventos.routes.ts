@@ -9,7 +9,7 @@ import { eventosService, TIPOS_VINCULO } from './eventos.service';
 
 export const eventosRouter = Router();
 
-// Acepta ISO 8601; se convierte a Date antes de llegar a Prisma.
+// Accepts ISO 8601; it is converted to Date before reaching Prisma.
 const fecha = z.coerce.date().nullable().optional();
 
 const esquemaCrear = z.object({
@@ -27,9 +27,9 @@ const esquemaCrear = z.object({
 const esquemaActualizar = esquemaCrear.partial();
 const esquemaIds = z.object({ ids: z.array(z.number().int().positive()) });
 
-// ---------------- Lectura pública ----------------
+// ---------------- Public reads ----------------
 
-// Los tipos de sitio a los que se puede vincular un evento.
+// The site types an event can be linked to.
 eventosRouter.get('/tipos-vinculo', (_req, res) => {
   res.json(TIPOS_VINCULO);
 });
@@ -41,7 +41,7 @@ eventosRouter.get(
   }),
 );
 
-// ?filtro= ?provincia= ?canton= ?distrito= ?vigentes=true ?skip= ?take=
+// ?filtro= ?provincia= ?canton= ?distrito= ?vigentes=true ?proximos=true ?skip= ?take=
 eventosRouter.get(
   '/',
   asyncHandler(async (req, res) => {
@@ -56,7 +56,7 @@ eventosRouter.get(
   }),
 );
 
-// ---------------- Escritura ----------------
+// ---------------- Writes ----------------
 
 eventosRouter.post(
   '/',

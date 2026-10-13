@@ -4,8 +4,8 @@ import {
   crearServicioSitio,
 } from '../../lib/sitios';
 
-// Hoteles. Es el único sitio además de atracciones que tiene
-// categorías propias.
+// Hotels. It is the only site besides attractions that has its own
+// categories.
 export const hotelesService = crearServicioSitio({
   delegado: prisma.hoteles,
   etiqueta: 'Hotel',

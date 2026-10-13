@@ -2,19 +2,20 @@ import { prisma } from '../db/prisma';
 import { noEncontrado } from './errors';
 import { EstadoEntidad } from '../types/roles';
 import { combinarWhere, leerOrden, leerPaginacion } from './query';
+import { listarConImagenes } from './nuevosPrimero';
 
-// Fábrica de servicios para los "sitios" del sistema.
-// Hoteles, restaurantes, oficinas, operadores y rentadoras son la misma
-// entidad con distinto nombre: una ubicación, una galería de imágenes,
-// una lista de contactos y un bloque de accesibilidad. En el sistema
-// anterior eso estaba copiado y pegado cinco veces (cinco servicios de
-// entre 12 y 24 KB, con las mismas concatenaciones de SQL en cada uno).
-// Aquí la lógica vive una sola vez y cada módulo sólo declara en qué se
-// diferencia. Si mañana hay que arreglar la búsqueda, se arregla una vez.
+// Service factory for the system's "sites".
+// Hotels, restaurants, offices, operators and rental companies are the
+// same entity with a different name: a location, an image gallery, a
+// list of contacts and an accessibility block. In the previous system
+// that was copied and pasted five times (five services of 12 to 24 KB,
+// with the same SQL concatenations in each one). Here the logic lives
+// in one place and each module only declares how it differs. If the
+// search needs fixing tomorrow, it is fixed once.
 
 // ------------------------------------------------------------
-//  Conjuntos de campos de accesibilidad
-//  (no todas las tablas tienen los mismos; se respeta el DDL real)
+//  Accessibility field sets
+//  (not every table has the same ones; the real DDL is respected)
 // ------------------------------------------------------------
 
 const DISCAPACIDAD = [
@@ -25,7 +26,7 @@ const DISCAPACIDAD = [
   'discapacidadSicosocial',
 ] as const;
 
-// hoteles, restaurantes: incluyen mascotas, niños y declaración turística.
+// hotels, restaurants: include pets, children and tourist declaration.
 export const ACCESIBILIDAD_COMPLETA = [
   'declaracionTuristica',
   'permitenMascotas',
@@ -33,38 +34,39 @@ export const ACCESIBILIDAD_COMPLETA = [
   ...DISCAPACIDAD,
 ] as const;
 
-// oficinas, operadores: sin mascotas ni niños.
+// offices, operators: no pets or children.
 export const ACCESIBILIDAD_SIN_MASCOTAS = ['declaracionTuristica', ...DISCAPACIDAD] as const;
 
-// rentadoras: la tabla no tiene declaracionTuristica.
+// rental companies: the table has no declaracionTuristica.
 export const ACCESIBILIDAD_SOLO_DISCAPACIDAD = [...DISCAPACIDAD] as const;
 
 // ------------------------------------------------------------
-//  Configuración de cada sitio
+//  Configuration of each site
 // ------------------------------------------------------------
 
-// Describe una tabla intermedia (sitio ↔ categoría / contacto).
+// Describes a join table (site ↔ category / contact).
 export interface Union {
-  // El delegado de Prisma de la tabla intermedia.
+  // The Prisma delegate of the join table.
   delegado: any;
-  // Nombre de la columna que apunta al sitio, p. ej. "hotelesId".
+  // Name of the column that points to the site, e.g. "hotelesId".
   campoPropio: string;
-  // Nombre de la columna que apunta a la otra entidad, p. ej. "categoriasId".
+  // Name of the column that points to the other entity, e.g.
+  // "categoriasId".
   campoAjeno: string;
-  // Nombre de la relación al leer, p. ej. "categoria".
+  // Name of the relation when reading, e.g. "categoria".
   relacion: string;
 }
 
 export interface ConfigSitio {
-  // El delegado de Prisma de la tabla principal.
+  // The Prisma delegate of the main table.
   delegado: any;
-  // Cómo se llama en los mensajes de error.
+  // What it is called in error messages.
   etiqueta: string;
-  // Campos de texto sobre los que busca ?filtro=.
+  // Text fields that ?filtro= searches over.
   camposTexto?: readonly string[];
-  // Campos booleanos que acepta ?accesibilidad=.
+  // Boolean fields that ?accesibilidad= accepts.
   camposAccesibilidad?: readonly string[];
-  // Campos por los que se puede ordenar.
+  // Fields the results can be ordered by.
   camposOrdenables?: readonly string[];
   union?: {
     categorias?: Union;
@@ -82,7 +84,7 @@ export function crearServicioSitio(config: ConfigSitio) {
   const unionCategorias = config.union?.categorias;
   const unionContactos = config.union?.contactos;
 
-  // Relaciones que se traen siempre.
+  // Relations that are always loaded.
   const RELACIONES: Record<string, unknown> = {
     ubicacion: true,
     imagenes: { where: { state: EstadoEntidad.ACTIVO } },
@@ -90,7 +92,7 @@ export function crearServicioSitio(config: ConfigSitio) {
   if (unionCategorias) RELACIONES.categorias = { include: { [unionCategorias.relacion]: true } };
   if (unionContactos) RELACIONES.contactos = { include: { [unionContactos.relacion]: true } };
 
-  // Aplana las tablas intermedias para que el frontend reciba algo simple.
+  // Flattens the join tables so the frontend receives something simple.
   function darFormato(fila: any) {
     if (!fila) return fila;
     const { categorias, contactos, ...resto } = fila;
@@ -104,7 +106,7 @@ export function crearServicioSitio(config: ConfigSitio) {
     return salida;
   }
 
-  // Búsqueda de texto sobre el sitio y sus relaciones.
+  // Text search over the site and its relations.
   function busquedaTexto(termino?: string) {
     const t = termino?.trim();
     if (!t) return undefined;
@@ -148,7 +150,7 @@ export function crearServicioSitio(config: ConfigSitio) {
     return { OR: opciones };
   }
 
-  // Filtro por ubicación. Sólo se aplican las partes que vengan.
+  // Location filter. Only the parts that are provided are applied.
   function filtroUbicacion(u: { provincia?: string; canton?: string; distrito?: string }) {
     const cond: Record<string, unknown> = {};
     if (u.provincia?.trim()) cond.provincia = { contains: u.provincia.trim() };
@@ -158,7 +160,7 @@ export function crearServicioSitio(config: ConfigSitio) {
     return { ubicacion: cond };
   }
 
-  // Filtro por categorías, recibidas por nombre.
+  // Category filter, received by name.
   function filtroCategorias(nombres?: string[]) {
     if (!unionCategorias) return undefined;
     const limpios = (nombres ?? []).map((n) => n.trim()).filter(Boolean);
@@ -170,9 +172,8 @@ export function crearServicioSitio(config: ConfigSitio) {
     };
   }
 
-  // Filtro por accesibilidad. Sólo se aceptan los nombres de columna
-  // declarados por el módulo; cualquier otro se ignora en vez de
-  // llegar a la consulta.
+  // Accessibility filter. Only column names declared by the module are
+  // accepted; any other is ignored instead of reaching the query.
   function filtroAccesibilidad(campos?: string[]) {
     const validos = (campos ?? []).filter((c) => camposAccesibilidad.includes(c));
     if (validos.length === 0) return undefined;
@@ -180,7 +181,7 @@ export function crearServicioSitio(config: ConfigSitio) {
   }
 
   const servicio = {
-    // Los nombres de columna de accesibilidad que este sitio admite.
+    // The accessibility column names this site supports.
     camposAccesibilidad,
 
     async listar(query: Record<string, unknown>) {
@@ -213,26 +214,15 @@ export function crearServicioSitio(config: ConfigSitio) {
       return darFormato(fila);
     },
 
-    // Sólo los que tienen al menos una imagen activa.
-    async conImagenes(query: Record<string, unknown>) {
-      const { skip, take } = leerPaginacion(query);
-      const where = {
-        state: EstadoEntidad.ACTIVO,
-        imagenes: { some: { state: EstadoEntidad.ACTIVO } },
-      };
-
-      const [datos, total] = await Promise.all([
-        config.delegado.findMany({
-          where,
-          orderBy: { nombre: 'asc' },
-          skip,
-          take,
-          include: RELACIONES,
-        }),
-        config.delegado.count({ where }),
-      ]);
-
-      return { total, datos: datos.map(darFormato) };
+    // Only those that have at least one active image. With ?nuevos=<days>
+    // the recently created ones come first.
+    conImagenes(query: Record<string, unknown>) {
+      return listarConImagenes({
+        delegado: config.delegado,
+        include: RELACIONES,
+        darFormato,
+        query,
+      });
     },
 
     async crear(datos: Record<string, unknown>) {
@@ -253,7 +243,7 @@ export function crearServicioSitio(config: ConfigSitio) {
       return darFormato(actualizada);
     },
 
-    // Reemplaza por completo las categorías asociadas.
+    // Completely replaces the associated categories.
     async definirCategorias(id: number, ids: number[]) {
       if (!unionCategorias) throw noEncontrado('Categorías para ' + config.etiqueta);
       await servicio.obtenerPorId(id);
@@ -268,7 +258,7 @@ export function crearServicioSitio(config: ConfigSitio) {
       return servicio.obtenerPorId(id);
     },
 
-    // Reemplaza por completo los contactos asociados.
+    // Completely replaces the associated contacts.
     async definirContactos(id: number, ids: number[]) {
       if (!unionContactos) throw noEncontrado('Contactos para ' + config.etiqueta);
       await servicio.obtenerPorId(id);
@@ -283,23 +273,22 @@ export function crearServicioSitio(config: ConfigSitio) {
       return servicio.obtenerPorId(id);
     },
 
-    // Sitios relacionados, para la barra lateral de la página de
-    // detalle.
-    // Reemplaza a findBySameCategory / findWithoutMe del sistema
-    // anterior, con tres diferencias:
-    //  1. El actual se excluye por id, no por nombre. El viejo hacía
-    //     `nombre != '<texto de la petición>'`, lo que además de
-    //     frágil era otro punto de inyección.
-    //  2. Las categorías se sacan del propio sitio en vez de pedirle
-    //     al frontend que las mande de vuelta.
-    //  3. Se comparan tanto `nombre` como `nombreIngles`. El viejo
-    //     comparaba sólo uno de los dos según el módulo, y como buena
-    //     parte de las categorías tienen el nombre en inglés vacío,
-    //     en atracciones eso dejaba fuera resultados válidos.
-    // Los sitios sin categorías propias (restaurantes, oficinas,
-    // operadores, rentadoras) devuelven otros del mismo tipo, que es
-    // exactamente lo que hacía el viejo: en esos módulos el filtro por
-    // categoría estaba comentado en el código.
+    // Related sites, for the sidebar of the detail page.
+    // Replaces findBySameCategory / findWithoutMe from the previous
+    // system, with three differences:
+    //  1. The current one is excluded by id, not by name. The old one did
+    //     `nombre != '<request text>'`, which on top of being fragile was
+    //     another injection point.
+    //  2. The categories are taken from the site itself instead of asking
+    //     the frontend to send them back.
+    //  3. Both `nombre` and `nombreIngles` are compared. The old one
+    //     compared only one of the two depending on the module, and since
+    //     a good part of the categories have an empty English name, in
+    //     attractions that left out valid results.
+    // Sites without their own categories (restaurants, offices,
+    // operators, rental companies) return others of the same type, which
+    // is exactly what the old one did: in those modules the category
+    // filter was commented out in the code.
     async relacionados(id: number, take = 3) {
       const actual: any = await servicio.obtenerPorId(id);
 
@@ -325,10 +314,9 @@ export function crearServicioSitio(config: ConfigSitio) {
         }
       }
 
-      // El viejo usaba ORDER BY RAND() de MySQL, que obliga a ordenar
-      // la tabla entera. Aquí se traen sólo los ids candidatos y se
-      // barajan en memoria: son tablas de cientos de filas, no de
-      // millones.
+      // The old one used MySQL's ORDER BY RAND(), which forces sorting the
+      // whole table. Here only the candidate ids are fetched and shuffled in
+      // memory: these are tables of hundreds of rows, not millions.
       const candidatos: Array<{ id: number }> = await config.delegado.findMany({
         where,
         select: { id: true },
@@ -344,8 +332,8 @@ export function crearServicioSitio(config: ConfigSitio) {
       return { total: candidatos.length, datos: datos.map(darFormato) };
     },
 
-    // Quita un solo contacto del sitio, sin tocar los demás.
-    // Equivale al PUT /delete/contacto/ del sistema anterior.
+    // Removes a single contact from the site, without touching the others.
+    // Equivalent to the previous system's PUT /delete/contacto/.
     async quitarContacto(id: number, contactoId: number) {
       if (!unionContactos) throw noEncontrado('Contactos para ' + config.etiqueta);
       await servicio.obtenerPorId(id);
@@ -358,8 +346,8 @@ export function crearServicioSitio(config: ConfigSitio) {
       return servicio.obtenerPorId(id);
     },
 
-    // Baja lógica. El sistema nunca borra filas: cambia state a
-    // 'Inactive', igual que hacía el anterior.
+    // Soft delete. The system never deletes rows: it changes state to
+    // 'Inactive', just like the previous one did.
     async desactivar(id: number) {
       await servicio.obtenerPorId(id);
       return config.delegado.update({
@@ -374,7 +362,7 @@ export function crearServicioSitio(config: ConfigSitio) {
 
 export type ServicioSitio = ReturnType<typeof crearServicioSitio>;
 
-// Acepta ?x=a&x=b y también ?x=a,b
+// Accepts ?x=a&x=b as well as ?x=a,b
 export function normalizarLista(valor: unknown): string[] | undefined {
   if (valor === undefined || valor === null) return undefined;
   if (Array.isArray(valor)) return valor.map(String);
@@ -382,7 +370,7 @@ export function normalizarLista(valor: unknown): string[] | undefined {
   return undefined;
 }
 
-// Barajado de Fisher-Yates, para el orden aleatorio de relacionados.
+// Fisher-Yates shuffle, for the random order of related sites.
 export function barajar<T>(lista: T[]): T[] {
   const copia = [...lista];
   for (let i = copia.length - 1; i > 0; i--) {

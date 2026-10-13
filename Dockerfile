@@ -1,15 +1,15 @@
 # ------------------------------------------------------------
-#  Backend REST — Rutas Turísticas Pérez Zeledón
+#  REST backend — Rutas Turísticas Pérez Zeledón
 #
-#  Imagen multi-etapa: se compila con todas las dependencias y se
-#  ejecuta con las de producción nada más. La imagen final no lleva
-#  TypeScript, ni tsx, ni el código fuente.
+#  Multi-stage image: it is built with all dependencies and runs with
+#  production ones only. The final image carries no TypeScript, no
+#  tsx and no source code.
 # ------------------------------------------------------------
 
-# --- Etapa 1: dependencias completas y compilación ---
+# --- Stage 1: full dependencies and build ---
 FROM node:22-bookworm-slim AS build
 
-# Prisma necesita openssl para sus binarios de consulta.
+# Prisma needs openssl for its query engine binaries.
 RUN apt-get update && apt-get install -y --no-install-recommends openssl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -18,14 +18,14 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-# El código completo antes de generar el cliente: prisma.config.ts lee
-# src/config/entorno.ts para saber a qué base apunta.
+# The full source goes in before generating the client: prisma.config.ts
+# reads src/config/entorno.ts to know which database to point at.
 COPY . .
 
 RUN npx prisma generate
 RUN npm run build
 
-# --- Etapa 2: sólo lo necesario para correr ---
+# --- Stage 2: only what is needed to run ---
 FROM node:22-bookworm-slim AS runtime
 
 RUN apt-get update && apt-get install -y --no-install-recommends openssl \
@@ -38,21 +38,22 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
-# El cliente generado de Prisma y el esquema: el cliente se genera
-# contra la versión instalada, así que se copia desde la etapa de
-# compilación en vez de volver a generarlo.
+# The generated Prisma client and the schema: the client is generated
+# against the installed version, so it is copied from the build stage
+# instead of generating it again.
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/dist ./dist
 
-# Carpeta de imágenes. En compose se monta encima como volumen; se crea
-# aquí para que el contenedor arranque aunque no se monte nada.
+# Images folder. In compose a volume is mounted over it; it is created
+# here so the container starts even if nothing is mounted.
 RUN mkdir -p /app/uploads && chown -R node:node /app/uploads
 
-# No correr como root.
-USER node
+COPY entrypoint.sh /usr/local/bin/entrypoint-rutas.sh
+RUN chmod +x /usr/local/bin/entrypoint-rutas.sh
 
 EXPOSE 2999
 
+ENTRYPOINT ["/usr/local/bin/entrypoint-rutas.sh"]
 CMD ["node", "dist/server.js"]

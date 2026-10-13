@@ -6,19 +6,19 @@ import { noEncontrado, solicitudInvalida } from '../../lib/errors';
 import { EstadoEntidad } from '../../types/roles';
 import { leerPaginacion } from '../../lib/query';
 
-// Imágenes.
-// El sistema anterior subía los archivos a Firebase Storage desde el
-// panel de administración y guardaba en la base la URL completa que
-// Firebase devolvía, con su token de acceso incluido. Eso ataba el
-// proyecto a una cuenta personal: si esa cuenta se cae, las 1219
-// imágenes del sitio desaparecen.
-// Aquí el archivo se guarda en el disco del servidor y en la base sólo
-// queda una ruta relativa (/uploads/nombre.jpg). El mismo backend la
-// sirve como estático. No hay servicio externo de por medio.
-// Se conserva la convención de nombres original —idDueño-timestamp.ext—
-// porque es la que usan los 1587 archivos ya rescatados.
+// Images.
+// The previous system uploaded files to Firebase Storage from the
+// admin panel and saved in the database the full URL Firebase
+// returned, with its access token included. That tied the project to
+// a personal account: if that account goes down, the site's 1219
+// images disappear.
+// Here the file is saved on the server's disk and the database only
+// keeps a relative path (/uploads/name.jpg). The same backend serves
+// it as a static file. There is no external service in between.
+// The original naming convention is kept —ownerId-timestamp.ext—
+// because it is the one used by the 1587 files already rescued.
 
-// Las siete tablas de imágenes, cada una con su columna de dueño.
+// The seven image tables, each with its owner column.
 const TIPOS = {
   atracciones: { delegado: prisma.imagenes, campo: 'atraccionId' },
   hoteles: { delegado: prisma.imagenesHoteles, campo: 'hotelId' },
@@ -42,9 +42,9 @@ export type TipoImagen = keyof typeof TIPOS;
 
 export const TIPOS_IMAGEN = Object.keys(TIPOS) as TipoImagen[];
 
-// Traduce el tipo que viene en la URL a su tabla. Nunca se arma el
-// nombre de una tabla con texto de la petición: si el tipo no está en
-// la lista, la petición se rechaza.
+// Translates the type that comes in the URL to its table. A table
+// name is never built from request text: if the type is not in the
+// list, the request is rejected.
 function resolver(tipo: string) {
   if (!TIPOS_IMAGEN.includes(tipo as TipoImagen)) {
     throw solicitudInvalida(
@@ -54,10 +54,10 @@ function resolver(tipo: string) {
   return TIPOS[tipo as TipoImagen];
 }
 
-// Extensiones aceptadas, en minúscula.
+// Accepted extensions, in lowercase.
 export const EXTENSIONES_PERMITIDAS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
 
-// Genera el nombre de archivo con la convención original.
+// Generates the file name with the original convention.
 export function nombreDeArchivo(idDueno: number, nombreOriginal: string): string {
   const ext = path.extname(nombreOriginal).toLowerCase();
   if (!EXTENSIONES_PERMITIDAS.includes(ext)) {
@@ -71,7 +71,7 @@ export function nombreDeArchivo(idDueno: number, nombreOriginal: string): string
 export const imagenesService = {
   tipos: TIPOS_IMAGEN,
 
-  // Listado por dueño, o de todo el tipo si no se indica dueño.
+  // List by owner, or of the whole type if no owner is given.
   async listar(tipo: string, query: Record<string, unknown>) {
     const { delegado, campo } = resolver(tipo);
     const { skip, take } = leerPaginacion(query);
@@ -100,8 +100,8 @@ export const imagenesService = {
     return imagen;
   },
 
-  // Registra en la base un archivo que multer ya dejó en el disco.
-  // Si la inserción falla, se borra el archivo para no dejar basura.
+  // Registers in the database a file that multer already left on disk.
+  // If the insert fails, the file is deleted so no garbage is left.
   async registrar(
     tipo: string,
     idDueno: number,
@@ -126,7 +126,7 @@ export const imagenesService = {
     }
   },
 
-  // Sólo se puede cambiar el texto; el archivo no se reemplaza en sitio.
+  // Only the text can be changed; the file is not replaced in place.
   async actualizar(
     tipo: string,
     id: number,
@@ -140,10 +140,9 @@ export const imagenesService = {
     });
   },
 
-  // Baja lógica. El archivo se queda en el disco a propósito: en este
-  // proyecto ya se perdieron dos imágenes por borrados de por medio,
-  // así que quitarla del sitio y borrarla del disco son dos decisiones
-  // distintas.
+  // Soft delete. The file stays on disk on purpose: in this project two
+  // images were already lost to stray deletions, so removing it from the
+  // site and deleting it from disk are two different decisions.
   async desactivar(tipo: string, id: number) {
     const { delegado } = resolver(tipo);
     await imagenesService.obtenerPorId(tipo, id);

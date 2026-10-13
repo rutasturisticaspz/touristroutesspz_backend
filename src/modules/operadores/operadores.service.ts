@@ -1,7 +1,7 @@
 import { prisma } from '../../db/prisma';
 import { ACCESIBILIDAD_SIN_MASCOTAS, crearServicioSitio } from '../../lib/sitios';
 
-// Operadores turísticos.
+// Tour operators.
 export const operadoresService = crearServicioSitio({
   delegado: prisma.operadoresTuristicos,
   etiqueta: 'Operador turístico',

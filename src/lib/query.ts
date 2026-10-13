@@ -1,10 +1,10 @@
 import { solicitudInvalida } from './errors';
 
-// Reemplazo de la clase QueryOptions original.
-// La versión anterior aceptaba un arreglo de cadenas SQL que se
-// concatenaban directamente a la consulta, lo que permitía inyección.
-// Esta versión sólo acepta nombres de campo previamente autorizados y
-// arma objetos que Prisma parametriza por su cuenta.
+// Replacement for the original QueryOptions class.
+// The previous version accepted an array of SQL strings that were
+// concatenated directly into the query, which allowed injection.
+// This version only accepts previously authorized field names and
+// builds objects that Prisma parameterizes on its own.
 
 export interface OpcionesPaginacion {
   skip?: number;
@@ -19,7 +19,7 @@ export interface OpcionesOrden<TCampo extends string> {
 const TAKE_POR_DEFECTO = 20;
 const TAKE_MAXIMO = 100;
 
-// Lee skip y take desde la query string, con topes sanos.
+// Reads skip and take from the query string, with sane limits.
 export function leerPaginacion(query: Record<string, unknown>): Required<OpcionesPaginacion> {
   const skip = numeroOpcional(query.skip, 'skip') ?? 0;
   const takeCrudo = numeroOpcional(query.take, 'take') ?? TAKE_POR_DEFECTO;
@@ -30,8 +30,8 @@ export function leerPaginacion(query: Record<string, unknown>): Required<Opcione
   return { skip, take: Math.min(takeCrudo, TAKE_MAXIMO) };
 }
 
-// Lee el ordenamiento validando el campo contra una lista blanca.
-// Un campo no autorizado produce un error, nunca llega a la consulta.
+// Reads the ordering, validating the field against a whitelist.
+// An unauthorized field produces an error and never reaches the query.
 export function leerOrden<TCampo extends string>(
   query: Record<string, unknown>,
   camposPermitidos: readonly TCampo[],
@@ -54,9 +54,9 @@ export function leerOrden<TCampo extends string>(
   return { [campo]: direccion };
 }
 
-// Construye un filtro de texto sobre varios campos.
-// El término va como valor en el objeto `where`; Prisma lo parametriza,
-// así que no hay forma de que se interprete como SQL.
+// Builds a text filter over several fields.
+// The term goes as a value in the `where` object; Prisma parameterizes
+// it, so there is no way for it to be interpreted as SQL.
 export function filtroTexto(
   termino: string | undefined,
   campos: readonly string[],
@@ -71,7 +71,7 @@ export function filtroTexto(
   };
 }
 
-// Combina condiciones ignorando las indefinidas.
+// Combines conditions, ignoring the undefined ones.
 export function combinarWhere(
   ...condiciones: Array<Record<string, unknown> | undefined>
 ): Record<string, unknown> {
@@ -83,7 +83,7 @@ export function combinarWhere(
   return { AND: presentes };
 }
 
-// Lee un id numérico obligatorio desde la query string o los params.
+// Reads a required numeric id from the query string or the params.
 export function leerId(valor: unknown, nombre = 'id'): number {
   const n = numeroOpcional(valor, nombre);
   if (n === undefined) throw solicitudInvalida(`Falta el parámetro ${nombre}`);

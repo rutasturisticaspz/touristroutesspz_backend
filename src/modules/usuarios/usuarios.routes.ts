@@ -40,9 +40,9 @@ function validar<T>(esquema: z.ZodSchema<T>, datos: unknown): T {
   return resultado.data;
 }
 
-// ---------- Público ----------
+// ---------- Public ----------
 
-// Inicio de sesion del panel de administracion (ADMIN o MODERATOR).
+// Sign-in for the administration panel (ADMIN or MODERATOR).
 usuariosRouter.post(
   '/login',
   asyncHandler(async (req, res) => {
@@ -51,9 +51,9 @@ usuariosRouter.post(
   }),
 );
 
-// Inicio de sesion para usuarios del sitio publico, sin exigir rol de
-// panel. Es el /login del sistema anterior (el del panel era
-// /loginAdmin). Lo usan calificaciones y rutas turisticas.
+// Sign-in for users of the public site, without requiring a panel
+// role. It is the previous system's /login (the panel's was
+// /loginAdmin). Used by ratings and tourist routes.
 usuariosRouter.post(
   '/login-publico',
   asyncHandler(async (req, res) => {
@@ -62,10 +62,11 @@ usuariosRouter.post(
   }),
 );
 
-// ---------- Requiere sesión ----------
+// ---------- Requires a session ----------
 
-// Datos del usuario autenticado.
-// Renueva el token de una sesion vigente, sin volver a pedir la clave.
+// Data of the authenticated user.
+// Renews the token of a valid session, without asking for the
+// password again.
 usuariosRouter.post(
   '/renovar-token',
   requiereAutenticacion,
@@ -74,8 +75,9 @@ usuariosRouter.post(
   }),
 );
 
-// Busqueda por correo exacto. Requiere sesion: en el sistema anterior
-//  era publica, lo que permitia averiguar que correos estan registrados.
+// Search by exact email. Requires a session: in the previous system
+// it was public, which allowed finding out which emails are
+// registered.
 usuariosRouter.get(
   '/buscar',
   requiereAutenticacion,
@@ -93,7 +95,7 @@ usuariosRouter.get(
   }),
 );
 
-// Cambio de contraseña propia.
+// Change of one's own password.
 usuariosRouter.post(
   '/cambiar-contrasena',
   requiereAutenticacion,
@@ -110,7 +112,7 @@ usuariosRouter.post(
   }),
 );
 
-// ---------- Sólo administradores ----------
+// ---------- Administrators only ----------
 
 usuariosRouter.get(
   '/',
@@ -136,8 +138,8 @@ usuariosRouter.post(
   }),
 );
 
-// Alta de moderador con contrasena generada. Devuelve la contrasena
-// temporal UNA vez, en la respuesta; no se manda ningun correo.
+// Creation of a moderator with a generated password. Returns the
+// temporary password ONCE, in the response; no email is sent.
 usuariosRouter.post(
   '/moderadores',
   requiereAdmin,
@@ -181,8 +183,18 @@ usuariosRouter.put(
   }),
 );
 
-// Activa o desactiva una cuenta. Un administrador no puede desactivarse
-// a si mismo: si es el ultimo, nadie mas podria volver a entrar.
+// Generates a new password for the account and returns it only once.
+usuariosRouter.post(
+  '/:id/restablecer-contrasena',
+  requiereAdmin,
+  asyncHandler(async (req, res) => {
+    res.json(await usuariosService.restablecerContrasena(leerId(req.params.id)));
+  }),
+);
+
+// Activates or deactivates an account. An administrator cannot
+// deactivate themselves: if they are the last one, nobody else could
+// sign in again.
 usuariosRouter.put(
   '/:id/estado',
   requiereAdmin,
@@ -196,8 +208,9 @@ usuariosRouter.put(
   }),
 );
 
-// Elimina la cuenta de verdad (no solo la desactiva). Un administrador
-// no puede eliminarse a si mismo, igual que no puede desactivarse.
+// Actually deletes the account (it does not just deactivate it). An
+// administrator cannot delete themselves, just as they cannot
+// deactivate themselves.
 usuariosRouter.delete(
   '/:id',
   requiereAdmin,
