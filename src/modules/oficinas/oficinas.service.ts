@@ -1,8 +1,8 @@
 import { prisma } from '../../db/prisma';
 import { ACCESIBILIDAD_SIN_MASCOTAS, crearServicioSitio } from '../../lib/sitios';
 
-// Oficinas turísticas. La tabla no tiene permitenMascotas ni
-// permitenNinos, y sí tiene nombreEncargado.
+// Tourist offices. The table has no permitenMascotas or
+// permitenNinos, and it does have nombreEncargado.
 export const oficinasService = crearServicioSitio({
   delegado: prisma.oficinasTuristicas,
   etiqueta: 'Oficina turística',

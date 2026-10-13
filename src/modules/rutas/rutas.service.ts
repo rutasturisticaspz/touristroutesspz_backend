@@ -3,10 +3,10 @@ import { noAutorizado, noEncontrado, solicitudInvalida } from '../../lib/errors'
 import { EstadoEntidad, Rol } from '../../types/roles';
 import { leerPaginacion } from '../../lib/query';
 
-// Rutas turísticas: listas de atracciones armadas por un usuario.
-// Igual que calificaciones, esta tabla tiene 0 filas en producción. Se
-// porta para no perder la funcionalidad, y con la misma corrección:
-// antes cualquiera podía editar la ruta de otra persona.
+// Tourist routes: lists of attractions put together by a user.
+// Like ratings, this table has 0 rows in production. It is ported so
+// the feature is not lost, and with the same fix: before, anyone
+// could edit someone else's route.
 
 const RELACIONES = {
   usuario: { select: { id: true, nombre: true } },
@@ -22,7 +22,7 @@ const RELACIONES = {
   },
 };
 
-// Aplana la tabla intermedia, igual que en los demás módulos.
+// Flattens the join table, same as in the other modules.
 function darFormato(ruta: any) {
   if (!ruta) return ruta;
   const { atracciones, ...resto } = ruta;
@@ -102,7 +102,7 @@ export const rutasService = {
     return rutasService.obtenerPorId(id);
   },
 
-  // Reemplaza por completo las atracciones de la ruta.
+  // Completely replaces the route's attractions.
   async definirAtracciones(id: number, actor: { id: number; rol: string }, ids: number[]) {
     const ruta = await obtenerCrudo(id);
     verificarDueno(ruta, actor);

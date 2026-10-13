@@ -1,13 +1,12 @@
 import 'dotenv/config';
 
-// Carga del entorno del backend.
-// Cada parte del sistema tiene su propio archivo y su propia
-// configuración:
-//   backend/.env         lo de aquí (base de datos, JWT, uploads)
-//   frontend/.env.local  lo del sitio público
-//   .env (raíz)          sólo lo que necesita docker compose
-// Adentro de Docker no hay archivo: las variables las inyecta el
-// compose. `dotenv` simplemente no encuentra nada y sigue.
+// Backend environment loading.
+// Each part of the system has its own file and its own configuration:
+//   backend/.env         what is here (database, JWT, uploads)
+//   frontend/.env.local  the public site's settings
+//   .env (root)          only what docker compose needs
+// Inside Docker there is no file: compose injects the variables.
+// `dotenv` simply finds nothing and moves on.
 
 export function requerido(nombre: string): string {
   const valor = process.env[nombre];

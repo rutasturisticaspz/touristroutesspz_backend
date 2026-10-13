@@ -1,9 +1,9 @@
 import { prisma } from '../../db/prisma';
 import { ACCESIBILIDAD_SOLO_DISCAPACIDAD, crearServicioSitio } from '../../lib/sitios';
 
-// Rentadoras de vehículos. Ojo: esta tabla es la única que no tiene
-// la columna declaracionTuristica, así que su lista de accesibilidad
-// es más corta que la de los demás sitios.
+// Vehicle rental companies. Note: this table is the only one without
+// the declaracionTuristica column, so its accessibility list is
+// shorter than that of the other sites.
 export const rentadorasService = crearServicioSitio({
   delegado: prisma.rentadorasVehiculos,
   etiqueta: 'Rentadora de vehículos',

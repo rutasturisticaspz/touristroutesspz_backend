@@ -3,14 +3,13 @@ import { noAutorizado, noEncontrado, solicitudInvalida } from '../../lib/errors'
 import { EstadoEntidad, Rol } from '../../types/roles';
 import { leerPaginacion } from '../../lib/query';
 
-// Calificaciones de atracciones hechas por usuarios del sitio público.
-// OJO: en la base de producción esta tabla tiene 0 filas. La
-// funcionalidad existía en el código anterior pero nunca se usó. Se
-// porta para no perderla, no porque haya datos que migrar.
-// Diferencia con la versión anterior: allá los cuatro endpoints
-// estaban abiertos, así que cualquiera podía editar o borrar la
-// calificación de otra persona. Aquí sólo el autor o un administrador
-// pueden tocarla.
+// Attraction ratings made by users of the public site.
+// NOTE: in the production database this table has 0 rows. The feature
+// existed in the previous code but was never used. It is ported so it
+// is not lost, not because there is data to migrate.
+// Difference from the previous version: there, all four endpoints
+// were open, so anyone could edit or delete someone else's rating.
+// Here only the author or an administrator can touch it.
 
 const RELACIONES = {
   usuario: { select: { id: true, nombre: true } },
@@ -26,7 +25,7 @@ async function obtenerCrudo(id: number) {
   return calificacion;
 }
 
-// Sólo el autor o un administrador pueden modificar una calificación.
+// Only the author or an administrator can modify a rating.
 function verificarDueno(
   calificacion: { usuarioId: number | null },
   actor: { id: number; rol: string },
@@ -68,7 +67,8 @@ export const calificacionesService = {
 
   obtenerPorId: obtenerCrudo,
 
-  // El autor es siempre quien tiene la sesión, no lo que venga en el cuerpo.
+  // The author is always whoever holds the session, not what comes in
+  // the body.
   async crear(usuarioId: number, datos: { atraccionId: number; descripcion?: string | null }) {
     const atraccion = await prisma.atracciones.findUnique({
       where: { id: datos.atraccionId },

@@ -9,7 +9,7 @@ import { combinarWhere, filtroTexto, leerOrden, leerPaginacion } from '../../lib
 
 const RONDAS_BCRYPT = 12;
 
-// Campos que se pueden devolver. Nunca incluye `password`.
+// Fields that can be returned. It never includes `password`.
 const SELECCION_PUBLICA = {
   id: true,
   nombre: true,
@@ -47,10 +47,10 @@ export const usuariosService = {
     return usuario;
   },
 
-  // Inicio de sesión para el panel de administración.
-  // Mantiene las mismas validaciones que la versión anterior
-  // (contraseña con bcrypt, rol permitido y estado activo), pero el
-  // token que devuelve ya no incluye el hash de la contraseña.
+  // Sign-in for the administration panel.
+  // It keeps the same validations as the previous version (bcrypt
+  // password, allowed role and active state), but the token it returns
+  // no longer includes the password hash.
   async iniciarSesion(email: string, password: string, soloPanel = true) {
     if (!email || !password) {
       throw solicitudInvalida('Debe indicar correo y contraseña');
@@ -60,8 +60,8 @@ export const usuariosService = {
       where: { email },
     });
 
-    // Mismo mensaje para usuario inexistente y contraseña incorrecta,
-    // para no revelar cuáles correos están registrados.
+    // Same message for a nonexistent user and a wrong password, so as not
+    // to reveal which emails are registered.
     const mensajeGenerico = 'Usuario o contraseña incorrectos';
 
     if (!usuario?.password) throw noAutenticado(mensajeGenerico);
@@ -69,9 +69,9 @@ export const usuariosService = {
     const coincide = await bcrypt.compare(password, usuario.password);
     if (!coincide) throw noAutenticado(mensajeGenerico);
 
-    // El sistema anterior tenía dos endpoints: /login para cualquier
-    // usuario y /loginAdmin para el panel. Es la misma verificación con
-    // distinto filtro de rol, así que aquí es un parámetro.
+    // The previous system had two endpoints: /login for any user and
+    // /loginAdmin for the panel. It is the same check with a different
+    // role filter, so here it is a parameter.
     if (soloPanel && usuario.rol !== Rol.ADMIN && usuario.rol !== Rol.MODERADOR) {
       throw noAutenticado('El usuario no tiene acceso al panel de administración');
     }
@@ -97,12 +97,12 @@ export const usuariosService = {
     };
   },
 
-  // Renueva el token de una sesión ya válida, sin pedir la contraseña
-  // otra vez. Equivale al renewToken anterior.
-  // Vuelve a leer el usuario de la base a propósito: si lo
-  // desactivaron o le cambiaron el rol mientras tenía sesión abierta,
-  // la renovación lo tiene que reflejar en vez de arrastrar lo que
-  // decía el token viejo.
+  // Renews the token of an already valid session, without asking for
+  // the password again. Equivalent to the previous renewToken.
+  // It reads the user from the database again on purpose: if they were
+  // deactivated or had their role changed while having a session open,
+  // the renewal has to reflect that instead of carrying over what the
+  // old token said.
   async renovarToken(id: number) {
     const usuario = await prisma.usuarios.findUnique({ where: { id } });
     if (!usuario) throw noEncontrado('Usuario');
@@ -128,7 +128,7 @@ export const usuariosService = {
     };
   },
 
-  // Busqueda por correo exacto.
+  // Search by exact email.
   async obtenerPorEmail(email: string) {
     const usuario = await prisma.usuarios.findFirst({
       where: { email },
@@ -138,16 +138,16 @@ export const usuariosService = {
     return usuario;
   },
 
-  // Alta de un moderador con contrasena generada.
-  // El sistema anterior generaba la contrasena y se la mandaba por
-  // correo al nuevo moderador usando una cuenta de Gmail cuya
-  // app-password estaba escrita en texto plano dentro del codigo
-  // fuente, en un repositorio que circulo entre varias personas.
-  // Aqui no se manda correo: la contrasena se devuelve UNA sola vez a
-  // quien creo la cuenta, para que se la entregue por el medio que
-  // corresponda. Cuando la Universidad de un SMTP institucional se
-  // puede conectar el envio; mientras tanto no hay ninguna credencial
-  // ajena viviendo en el repositorio.
+  // Creation of a moderator with a generated password.
+  // The previous system generated the password and emailed it to the
+  // new moderator using a Gmail account whose app password was written
+  // in plain text inside the source code, in a repository that circulated
+  // among several people.
+  // Here no email is sent: the password is returned ONCE to whoever
+  // created the account, so they can hand it over by whatever means is
+  // appropriate. When the University provides an institutional SMTP
+  // server, sending can be connected; in the meantime no foreign
+  // credential lives in the repository.
   async crearConContrasenaGenerada(datos: { nombre: string; email: string; rol: Rol }) {
     const password = generarContrasena();
     const usuario = await usuariosService.crear({ ...datos, password });
@@ -172,10 +172,10 @@ export const usuariosService = {
     });
   },
 
-  // Actualiza datos del usuario.
-  // A diferencia de la versión anterior, que pasaba el cuerpo completo
-  // de la petición al ORM, aquí sólo se aceptan campos explícitos.
-  // El rol y la contraseña no se pueden cambiar por esta vía.
+  // Updates the user's data.
+  // Unlike the previous version, which passed the whole request body to
+  // the ORM, here only explicit fields are accepted.
+  // The role and the password cannot be changed this way.
   async actualizar(id: number, datos: { nombre?: string; email?: string }) {
     await this.obtenerPorId(id);
 
@@ -190,7 +190,7 @@ export const usuariosService = {
     });
   },
 
-  // Cambio de rol. Operación separada y restringida a administradores.
+  // Role change. Separate operation, restricted to administrators.
   async cambiarRol(id: number, rol: Rol) {
     await this.obtenerPorId(id);
     return prisma.usuarios.update({
@@ -228,11 +228,25 @@ export const usuariosService = {
     return { ok: true };
   },
 
-  // Activa o desactiva la cuenta.
-  // El panel anterior llamaba a un endpoint que recibia el estado en
-  // crudo ("Active" / "Inactive") desde el navegador. Aqui entra un
-  // booleano y el valor de la columna lo pone el backend, que es el
-  // unico que tiene por que conocer como se escribe en la base.
+  // Resets the password of another account. Generates a new one and
+  // returns it ONCE, like the creation of moderators; no email is sent.
+  // The previous password stops working immediately.
+  async restablecerContrasena(id: number) {
+    await this.obtenerPorId(id);
+    const passwordTemporal = generarContrasena();
+    const hash = await bcrypt.hash(passwordTemporal, RONDAS_BCRYPT);
+    await prisma.usuarios.update({
+      where: { id },
+      data: { password: hash, updateAt: new Date() },
+    });
+    return { passwordTemporal };
+  },
+
+  // Activates or deactivates the account.
+  // The previous panel called an endpoint that received the raw state
+  // ("Active" / "Inactive") from the browser. Here a boolean comes in
+  // and the column value is set by the backend, which is the only one
+  // that needs to know how it is written in the database.
   async cambiarEstado(id: number, activo: boolean) {
     await this.obtenerPorId(id);
     return prisma.usuarios.update({
@@ -254,11 +268,11 @@ export const usuariosService = {
     });
   },
 
-  // Elimina el usuario de verdad (no es un cambio de estado).
-  // Si tiene calificaciones o rutas turisticas asociadas, la base
-  // rechaza el borrado (esas relaciones son onDelete: Restrict) para
-  // no dejar registros huerfanos; en ese caso se le pide al admin que
-  // desactive la cuenta en vez de eliminarla.
+  // Actually deletes the user (it is not a state change).
+  // If they have associated ratings or tourist routes, the database
+  // rejects the deletion (those relations are onDelete: Restrict) so as
+  // not to leave orphan records; in that case the admin is asked to
+  // deactivate the account instead of deleting it.
   async eliminar(id: number) {
     await this.obtenerPorId(id);
     try {
@@ -275,9 +289,10 @@ export const usuariosService = {
   },
 };
 
-// Contrasena temporal legible pero aleatoria. Usa randomInt del modulo
-// crypto, no Math.random, porque esto si es un secreto.
-// Se omiten caracteres que se confunden al dictarlos: l, I, 1, O, 0.
+// Readable but random temporary password. It uses randomInt from the
+// crypto module, not Math.random, because this is a secret.
+// Characters that are easily confused when dictated are left out: l,
+// I, 1, O, 0.
 const ALFABETO = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 function generarContrasena(largo = 12): string {

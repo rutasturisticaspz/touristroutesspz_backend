@@ -1,19 +1,20 @@
 import path from 'node:path';
 import { entero, requerido } from './entorno';
 
-// Configuración del backend.
-// Todo sale de variables de entorno, de `backend/.env`. No hay valores
-// de respaldo que apunten a ningún servidor: si falta una variable, el
-// proceso falla de inmediato en vez de conectarse a un lugar
-// inesperado. El sistema anterior tenía un `enviroments.prod.config.ts`
-// con la IP y las credenciales de producción escritas adentro.
+// Backend configuration.
+// Everything comes from environment variables, from `backend/.env`.
+// There are no fallback values pointing at any server: if a variable
+// is missing, the process fails right away instead of connecting to an
+// unexpected place. The previous system had an
+// `enviroments.prod.config.ts` with the production IP and credentials
+// written inside.
 
 export const config = {
   puerto: entero('PORT', 2999),
   entorno: process.env.NODE_ENV ?? 'development',
 
-  // Fuera de Docker apunta a 127.0.0.1; el compose la reemplaza por
-  // el host "db", que es el nombre del contenedor de MySQL en su red.
+  // Outside Docker it points to 127.0.0.1; compose replaces it with the
+  // host "db", which is the name of the MySQL container on its network.
   databaseUrl: requerido('DATABASE_URL'),
 
   jwt: {
@@ -29,20 +30,19 @@ export const config = {
 
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
 
-  // Envio de correo (SMTP). Opcional: si falta, el sistema arranca
-  // igual y solo "Responder por correo" en /admin/mensajes falla al
-  // usarse, con un aviso claro. Pensado para una cuenta institucional
-  // (por ejemplo, un SMTP de la Universidad o una cuenta de Google
-  // Workspace con contrasena de aplicacion) -- nunca la contrasena
-  // normal de una cuenta de Gmail personal, que Google no acepta para
-  // esto.
+  // Email sending (SMTP). Optional: if it is missing, the system starts
+  // anyway and only "Reply by email" in /admin/mensajes fails when used,
+  // with a clear notice. Meant for an institutional account (for
+  // example, a University SMTP server or a Google Workspace account with
+  // an app password) -- never the regular password of a personal Gmail
+  // account, which Google does not accept for this.
   correo: {
     host: process.env.SMTP_HOST,
     puerto: entero('SMTP_PORT', 587),
     usuario: process.env.SMTP_USER,
     password: process.env.SMTP_PASSWORD,
-    // Direccion que ve quien recibe el correo. Si no se define, se usa
-    // el mismo usuario SMTP.
+    // Address the email recipient sees. If not set, the same SMTP user is
+    // used.
     remitente: process.env.SMTP_FROM ?? process.env.SMTP_USER,
   },
 } as const;

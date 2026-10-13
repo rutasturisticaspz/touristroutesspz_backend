@@ -4,14 +4,13 @@ import { config } from '../config';
 import { noAutenticado, noAutorizado } from '../lib/errors';
 import { Rol, type PayloadToken } from '../types/roles';
 
-// Autenticación y autorización.
-// Diferencia respecto a la versión anterior:
-//  1. Antes existía una tabla que mapeaba ruta -> rol, y casi todas las
-//     rutas de escritura estaban marcadas como públicas. Aquí la
-//     protección se declara en cada router: lo que no se marca como
-//     público, queda cerrado.
-//  2. El token ya no transporta el objeto completo del usuario (que
-//     incluía el hash de la contraseña). Sólo lleva id, email y rol.
+// Authentication and authorization.
+// Differences from the previous version:
+//  1. Before, there was a table mapping route -> role, and almost all
+//     write routes were marked as public. Here protection is declared
+//     in each router: whatever is not marked as public stays closed.
+//  2. The token no longer carries the full user object (which included
+//     the password hash). It only carries id, email and role.
 
 export function firmarToken(payload: PayloadToken): string {
   return jwt.sign(payload, config.jwt.secreto, {
@@ -19,14 +18,15 @@ export function firmarToken(payload: PayloadToken): string {
   } as jwt.SignOptions);
 }
 
-// Lee el token si viene, pero no obliga. Útil en rutas públicas.
+// Reads the token if present, but does not require it. Useful on
+// public routes.
 export function autenticacionOpcional(req: Request, _res: Response, next: NextFunction): void {
   const payload = leerToken(req);
   if (payload) req.usuario = payload;
   next();
 }
 
-// Exige un token válido.
+// Requires a valid token.
 export function requiereAutenticacion(req: Request, _res: Response, next: NextFunction): void {
   const payload = leerToken(req);
   if (!payload) throw noAutenticado('Se requiere iniciar sesión');
@@ -34,9 +34,9 @@ export function requiereAutenticacion(req: Request, _res: Response, next: NextFu
   next();
 }
 
-// Exige uno de los roles indicados.
-// ADMIN siempre pasa, para conservar el comportamiento anterior donde
-// el administrador tenía acceso a todo.
+// Requires one of the given roles.
+// ADMIN always passes, to keep the previous behavior where the
+// administrator had access to everything.
 export function requiereRol(...rolesPermitidos: Rol[]) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     const payload = leerToken(req);
@@ -52,10 +52,10 @@ export function requiereRol(...rolesPermitidos: Rol[]) {
   };
 }
 
-// Atajo: sólo administradores y moderadores pueden escribir contenido.
+// Shortcut: only administrators and moderators can write content.
 export const requiereEdicion = requiereRol(Rol.MODERADOR);
 
-// Atajo: sólo administradores.
+// Shortcut: administrators only.
 export const requiereAdmin = requiereRol(Rol.ADMIN);
 
 function leerToken(req: Request): PayloadToken | undefined {
