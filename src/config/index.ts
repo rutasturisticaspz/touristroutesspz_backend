@@ -30,19 +30,10 @@ export const config = {
 
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
 
-  // Email sending (SMTP). Optional: if it is missing, the system starts
-  // anyway and only "Reply by email" in /admin/mensajes fails when used,
-  // with a clear notice. Meant for an institutional account (for
-  // example, a University SMTP server or a Google Workspace account with
-  // an app password) -- never the regular password of a personal Gmail
-  // account, which Google does not accept for this.
   correo: {
-    host: process.env.SMTP_HOST,
-    puerto: entero('SMTP_PORT', 587),
-    usuario: process.env.SMTP_USER,
-    password: process.env.SMTP_PASSWORD,
-    // Address the email recipient sees. If not set, the same SMTP user is
-    // used.
-    remitente: process.env.SMTP_FROM ?? process.env.SMTP_USER,
+    clientId: process.env.GMAIL_CLIENT_ID,
+    clientSecret: process.env.GMAIL_CLIENT_SECRET,
+    refreshToken: process.env.GMAIL_REFRESH_TOKEN,
+    remitente: process.env.SMTP_FROM,
   },
 } as const;
