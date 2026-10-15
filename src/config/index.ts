@@ -9,6 +9,8 @@ import { entero, requerido } from './entorno';
 // `enviroments.prod.config.ts` with the production IP and credentials
 // written inside.
 
+const DEFAULT_ORIGIN = 'http://localhost:3000';
+
 export const config = {
   puerto: entero('PORT', 2999),
   entorno: process.env.NODE_ENV ?? 'development',
@@ -28,21 +30,16 @@ export const config = {
     tamanoMaximoBytes: 10 * 1024 * 1024,
   },
 
-  corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
+  corsOrigin: process.env.CORS_ORIGIN ?? DEFAULT_ORIGIN,
 
-  // Email sending (SMTP). Optional: if it is missing, the system starts
-  // anyway and only "Reply by email" in /admin/mensajes fails when used,
-  // with a clear notice. Meant for an institutional account (for
-  // example, a University SMTP server or a Google Workspace account with
-  // an app password) -- never the regular password of a personal Gmail
-  // account, which Google does not accept for this.
+  // Public address of the site, used to build the links sent by email
+  // (password links). It is normally the same as CORS_ORIGIN.
+  siteUrl: process.env.FRONTEND_URL ?? process.env.CORS_ORIGIN ?? DEFAULT_ORIGIN,
+
   correo: {
-    host: process.env.SMTP_HOST,
-    puerto: entero('SMTP_PORT', 587),
-    usuario: process.env.SMTP_USER,
-    password: process.env.SMTP_PASSWORD,
-    // Address the email recipient sees. If not set, the same SMTP user is
-    // used.
-    remitente: process.env.SMTP_FROM ?? process.env.SMTP_USER,
+    clientId: process.env.GMAIL_CLIENT_ID,
+    clientSecret: process.env.GMAIL_CLIENT_SECRET,
+    refreshToken: process.env.GMAIL_REFRESH_TOKEN,
+    remitente: process.env.SMTP_FROM,
   },
 } as const;
