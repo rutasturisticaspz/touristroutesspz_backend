@@ -32,6 +32,23 @@ const esquemaCambioContrasena = z.object({
   password2: z.string().min(1),
 });
 
+const forgotSchema = z.object({
+  email: z.string().trim().email('Correo inválido'),
+});
+
+const linkSchema = z.object({
+  token: z.string().min(1, 'Falta el enlace'),
+});
+
+// bcrypt only reads the first 72 bytes, so longer passwords would be
+// silently cut: better to refuse them.
+const newPasswordSchema = linkSchema.extend({
+  password: z
+    .string()
+    .min(8, 'La contraseña debe tener al menos 8 caracteres')
+    .max(72, 'La contraseña no puede pasar de 72 caracteres'),
+});
+
 function validar<T>(esquema: z.ZodSchema<T>, datos: unknown): T {
   const resultado = esquema.safeParse(datos);
   if (!resultado.success) {
@@ -59,6 +76,38 @@ usuariosRouter.post(
   asyncHandler(async (req, res) => {
     const { email, password } = validar(esquemaLogin, req.body);
     res.json(await usuariosService.iniciarSesion(email, password, false));
+  }),
+);
+
+// "Forgot my password": sends a link to the email if it belongs to an
+// active account. It always answers the same.
+usuariosRouter.post(
+  '/forgot-password',
+  asyncHandler(async (req, res) => {
+    const { email } = validar(forgotSchema, req.body);
+    await usuariosService.requestPasswordReset(email);
+    res.json({
+      ok: true,
+      message: 'Si el correo está registrado, te va a llegar un enlace para cambiar la contraseña.',
+    });
+  }),
+);
+
+// Checks that a password link still works.
+usuariosRouter.post(
+  '/validate-link',
+  asyncHandler(async (req, res) => {
+    const { token } = validar(linkSchema, req.body);
+    res.json(await usuariosService.validateLink(token));
+  }),
+);
+
+// Chooses the new password using the link received by email.
+usuariosRouter.post(
+  '/reset-with-link',
+  asyncHandler(async (req, res) => {
+    const { token, password } = validar(newPasswordSchema, req.body);
+    res.json(await usuariosService.resetWithLink(token, password));
   }),
 );
 
@@ -138,8 +187,8 @@ usuariosRouter.post(
   }),
 );
 
-// Creation of a moderator with a generated password. Returns the
-// temporary password ONCE, in the response; no email is sent.
+// Creation of an account without a password: the person receives a link
+// by email to choose theirs. `emailSent` says whether it went out.
 usuariosRouter.post(
   '/moderadores',
   requiereAdmin,
@@ -153,7 +202,7 @@ usuariosRouter.post(
       req.body,
     );
     res.status(201).json(
-      await usuariosService.crearConContrasenaGenerada({
+      await usuariosService.invite({
         ...datos,
         rol: datos.rol ?? Rol.MODERADOR,
       }),
@@ -183,12 +232,12 @@ usuariosRouter.put(
   }),
 );
 
-// Generates a new password for the account and returns it only once.
+// Sends the account a link to choose a new password.
 usuariosRouter.post(
   '/:id/restablecer-contrasena',
   requiereAdmin,
   asyncHandler(async (req, res) => {
-    res.json(await usuariosService.restablecerContrasena(leerId(req.params.id)));
+    res.json(await usuariosService.sendPasswordReset(leerId(req.params.id)));
   }),
 );
 

@@ -1,4 +1,4 @@
-import { randomInt } from 'node:crypto';
+import { randomBytes } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { Prisma } from '@prisma/client';
 import { prisma } from '../../db/prisma';
@@ -6,8 +6,18 @@ import { firmarToken } from '../../middleware/auth';
 import { noAutenticado, noEncontrado, solicitudInvalida } from '../../lib/errors';
 import { EstadoEntidad, Rol } from '../../types/roles';
 import { combinarWhere, filtroTexto, leerOrden, leerPaginacion } from '../../lib/query';
+import { createRateLimiter } from '../../lib/rateLimiter';
+import { isLinkValid, linkUserId, sendPasswordLink, type LinkReason } from './passwordLinks';
 
 const RONDAS_BCRYPT = 12;
+
+// Public "forgot my password" requests allowed per email in 15 minutes.
+const REQUESTS_PER_EMAIL = 3;
+const REQUEST_WINDOW_MS = 15 * 60 * 1000;
+const allowRequest = createRateLimiter(REQUESTS_PER_EMAIL, REQUEST_WINDOW_MS);
+
+const INVALID_LINK_MESSAGE =
+  'El enlace no es válido o ya venció. Pedí uno nuevo desde «¿Olvidaste tu contraseña?».';
 
 // Fields that can be returned. It never includes `password`.
 const SELECCION_PUBLICA = {
@@ -138,20 +148,22 @@ export const usuariosService = {
     return usuario;
   },
 
-  // Creation of a moderator with a generated password.
-  // The previous system generated the password and emailed it to the
-  // new moderator using a Gmail account whose app password was written
-  // in plain text inside the source code, in a repository that circulated
-  // among several people.
-  // Here no email is sent: the password is returned ONCE to whoever
-  // created the account, so they can hand it over by whatever means is
-  // appropriate. When the University provides an institutional SMTP
-  // server, sending can be connected; in the meantime no foreign
-  // credential lives in the repository.
-  async crearConContrasenaGenerada(datos: { nombre: string; email: string; rol: Rol }) {
-    const password = generarContrasena();
-    const usuario = await usuariosService.crear({ ...datos, password });
-    return { usuario, passwordTemporal: password };
+  // Creation of an account by an administrator.
+  // Nobody types or sees a password here: the account is created with a
+  // random one that is thrown away, and the person receives a link by
+  // email to choose their own. The previous system emailed a generated
+  // password using a Gmail account whose credentials were written in the
+  // source code.
+  // If the email cannot be sent the account still exists, and the
+  // administrator can send the link again with "sendPasswordReset".
+  async invite(data: { nombre: string; email: string; rol: Rol }) {
+    const user = await usuariosService.crear({
+      ...data,
+      password: throwawayPassword(),
+    });
+
+    const emailSent = await trySendLink(user.id, 'invitation');
+    return { usuario: user, emailSent };
   },
 
   async crear(datos: { nombre: string; email: string; password: string; rol: Rol }) {
@@ -228,18 +240,54 @@ export const usuariosService = {
     return { ok: true };
   },
 
-  // Resets the password of another account. Generates a new one and
-  // returns it ONCE, like the creation of moderators; no email is sent.
-  // The previous password stops working immediately.
-  async restablecerContrasena(id: number) {
-    await this.obtenerPorId(id);
-    const passwordTemporal = generarContrasena();
-    const hash = await bcrypt.hash(passwordTemporal, RONDAS_BCRYPT);
-    await prisma.usuarios.update({
-      where: { id },
+  // An administrator asks for a password link to be sent to another
+  // account. The current password keeps working until the person uses the
+  // link and chooses a new one. If the email cannot be sent the error
+  // reaches the administrator, because nothing else would tell them.
+  async sendPasswordReset(id: number) {
+    const user = await prisma.usuarios.findUnique({ where: { id } });
+    if (!user) throw noEncontrado('Usuario');
+    if (!user.email) throw solicitudInvalida('La cuenta no tiene correo registrado');
+
+    await sendPasswordLink(user, 'adminReset');
+    return { ok: true, email: user.email };
+  },
+
+  // Public "forgot my password". It answers the same whether or not the
+  // email exists, so the form cannot be used to find out who is
+  // registered. The email is sent without waiting for it, so the response
+  // time does not reveal it either.
+  async requestPasswordReset(email: string) {
+    const user = await prisma.usuarios.findFirst({ where: { email } });
+    if (!user?.email || user.state !== EstadoEntidad.ACTIVO) return;
+    if (!allowRequest(user.email.toLowerCase())) return;
+
+    void sendPasswordLink(user, 'forgot').catch((error) => {
+      console.error('No se pudo enviar el enlace de contraseña:', error);
+    });
+  },
+
+  // Tells the screen whether a link can still be used, before asking the
+  // person to type anything.
+  async validateLink(token: string) {
+    const user = await userFromLink(token);
+    return { nombre: user.nombre, email: user.email };
+  },
+
+  // Sets the new password from a link. The update is conditional on the
+  // password not having changed meanwhile, so two requests with the same
+  // link cannot both succeed.
+  async resetWithLink(token: string, newPassword: string) {
+    const user = await userFromLink(token);
+    const hash = await bcrypt.hash(newPassword, RONDAS_BCRYPT);
+
+    const { count } = await prisma.usuarios.updateMany({
+      where: { id: user.id, password: user.password },
       data: { password: hash, updateAt: new Date() },
     });
-    return { passwordTemporal };
+    if (count !== 1) throw solicitudInvalida(INVALID_LINK_MESSAGE);
+
+    return { ok: true };
   },
 
   // Activates or deactivates the account.
@@ -289,16 +337,29 @@ export const usuariosService = {
   },
 };
 
-// Readable but random temporary password. It uses randomInt from the
-// crypto module, not Math.random, because this is a secret.
-// Characters that are easily confused when dictated are left out: l,
-// I, 1, O, 0.
-const ALFABETO = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+// Password nobody will ever know: it only fills the column until the
+// person chooses theirs from the link.
+function throwawayPassword(): string {
+  return randomBytes(32).toString('base64url');
+}
 
-function generarContrasena(largo = 12): string {
-  let salida = '';
-  for (let i = 0; i < largo; i++) {
-    salida += ALFABETO[randomInt(ALFABETO.length)];
+async function userFromLink(token: string) {
+  const id = linkUserId(token);
+  const user = id === null ? null : await prisma.usuarios.findUnique({ where: { id } });
+
+  if (!user || !isLinkValid(token, user)) {
+    throw solicitudInvalida(INVALID_LINK_MESSAGE);
   }
-  return salida;
+  return user;
+}
+
+async function trySendLink(id: number, reason: LinkReason): Promise<boolean> {
+  try {
+    const user = await prisma.usuarios.findUniqueOrThrow({ where: { id } });
+    await sendPasswordLink(user, reason);
+    return true;
+  } catch (error) {
+    console.error('No se pudo enviar el enlace de contraseña:', error);
+    return false;
+  }
 }
