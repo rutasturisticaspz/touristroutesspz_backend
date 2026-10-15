@@ -9,6 +9,8 @@ import { entero, requerido } from './entorno';
 // `enviroments.prod.config.ts` with the production IP and credentials
 // written inside.
 
+const DEFAULT_ORIGIN = 'http://localhost:3000';
+
 export const config = {
   puerto: entero('PORT', 2999),
   entorno: process.env.NODE_ENV ?? 'development',
@@ -28,7 +30,11 @@ export const config = {
     tamanoMaximoBytes: 10 * 1024 * 1024,
   },
 
-  corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
+  corsOrigin: process.env.CORS_ORIGIN ?? DEFAULT_ORIGIN,
+
+  // Public address of the site, used to build the links sent by email
+  // (password links). It is normally the same as CORS_ORIGIN.
+  siteUrl: process.env.FRONTEND_URL ?? process.env.CORS_ORIGIN ?? DEFAULT_ORIGIN,
 
   correo: {
     clientId: process.env.GMAIL_CLIENT_ID,
