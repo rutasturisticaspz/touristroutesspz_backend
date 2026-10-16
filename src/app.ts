@@ -36,9 +36,14 @@ export function crearApp() {
 
   // Images served from the local disk, without depending on any external
   // storage service.
+
   app.use(
     config.uploads.rutaPublica,
-    express.static(config.uploads.directorio, { fallthrough: true, maxAge: '1d' }),
+    express.static(config.uploads.directorio, {
+      fallthrough: true,
+      maxAge: '1d',
+      immutable: true,
+    }),
   );
 
   app.get('/salud', (_req, res) => {
